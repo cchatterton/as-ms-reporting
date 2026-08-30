@@ -1,0 +1,4 @@
+{
+  "version": "1.3.0",
+  "body": "Fixed WordPress plugin recognition, removed the embedded credential, hardened release-critical security paths, and added standards-compliant GitHub update delivery."
+}
