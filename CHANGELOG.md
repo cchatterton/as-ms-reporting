@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.3.8 - 2026-08-31
+
+- Routed AI category classification and monthly summary generation through the WordPress 7 AI Client and its configured Settings > Connectors provider.
+- Retained direct OpenAI Responses API support as a fallback for WordPress installations without an available AI connector.
+- Removed the need to duplicate a WordPress connector API key in `wp-config.php` on WordPress 7.
+
 ## 1.3.7 - 2026-08-31
 
 - Fixed category classification by requesting strict structured output and extracting Responses API output robustly.

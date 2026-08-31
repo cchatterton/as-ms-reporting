@@ -128,22 +128,131 @@ function as_ms_parse_csv($raw, $post_id) {
 
 
 // ==========================
+// AI GENERATION
+// ==========================
+
+/**
+ * Generate text through the WordPress 7 AI Client, with direct OpenAI fallback.
+ *
+ * @param string     $input        User input.
+ * @param string     $instructions System instructions.
+ * @param array|null $schema       Optional JSON response schema.
+ * @return string|WP_Error
+ */
+function asms_generate_ai_text($input, $instructions, $schema = null) {
+    $wordpress_ai_error = null;
+
+    if (function_exists('wp_ai_client_prompt')) {
+        try {
+            $builder = wp_ai_client_prompt($input)
+                ->using_system_instruction($instructions);
+
+            if (defined('ASMS_OPENAI_MODEL') && ASMS_OPENAI_MODEL) {
+                $builder = $builder->using_model_preference(ASMS_OPENAI_MODEL);
+            }
+
+            if (is_array($schema)) {
+                $builder = $builder->as_json_response($schema);
+            }
+
+            $result = $builder->generate_text();
+
+            if (!is_wp_error($result)) {
+                return trim((string) $result);
+            }
+
+            $wordpress_ai_error = $result;
+        } catch (Throwable $error) {
+            $wordpress_ai_error = new WP_Error(
+                'asms_wordpress_ai_client_error',
+                $error->getMessage()
+            );
+        }
+    }
+
+    $api_key = asms_get_openai_api_key();
+
+    if ('' === $api_key) {
+        if (is_wp_error($wordpress_ai_error)) {
+            return $wordpress_ai_error;
+        }
+
+        return new WP_Error(
+            'asms_ai_unavailable',
+            'No configured WordPress AI connector or ASMS_OPENAI_API_KEY was available.'
+        );
+    }
+
+    $request_body = [
+        'model'        => defined('ASMS_OPENAI_MODEL') ? ASMS_OPENAI_MODEL : 'gpt-5.4',
+        'instructions' => $instructions,
+        'input'        => $input,
+        'store'        => false,
+    ];
+
+    if (is_array($schema)) {
+        $request_body['text'] = [
+            'format' => [
+                'type'   => 'json_schema',
+                'name'   => 'asms_response',
+                'strict' => true,
+                'schema' => $schema,
+            ],
+        ];
+    }
+
+    $response = wp_remote_post('https://api.openai.com/v1/responses', [
+        'headers' => [
+            'Authorization' => 'Bearer ' . $api_key,
+            'Content-Type'  => 'application/json',
+        ],
+        'body'    => wp_json_encode($request_body),
+        'timeout' => 45,
+    ]);
+
+    if (is_wp_error($response)) {
+        return $response;
+    }
+
+    $response_code = wp_remote_retrieve_response_code($response);
+    $response_body = wp_remote_retrieve_body($response);
+
+    if (200 > $response_code || 300 <= $response_code) {
+        $error_response = json_decode($response_body, true);
+        $error_message = $error_response['error']['message'] ?? 'The AI request failed.';
+
+        return new WP_Error('asms_ai_api_error', sanitize_text_field($error_message));
+    }
+
+    $json = json_decode($response_body, true);
+    $text = is_array($json) ? (string) ($json['output_text'] ?? '') : '';
+
+    if ('' === $text && !empty($json['output']) && is_array($json['output'])) {
+        foreach ($json['output'] as $output_item) {
+            foreach (($output_item['content'] ?? []) as $content_item) {
+                if ('output_text' === ($content_item['type'] ?? '') && isset($content_item['text'])) {
+                    $text .= (string) $content_item['text'];
+                }
+            }
+        }
+    }
+
+    if ('' === trim($text)) {
+        return new WP_Error('asms_ai_empty_response', 'The AI provider returned an empty response.');
+    }
+
+    return trim($text);
+}
+
+
+// ==========================
 // AI CLASSIFICATION
 // ==========================
 
 function as_ms_classify_data($rows) {
 
-    $api_key = asms_get_openai_api_key();
-
     if (empty($rows)) {
         return $rows;
-    }
-
-    if ('' === $api_key) {
-        return new WP_Error(
-            'asms_missing_openai_key',
-            'AI classification could not run because ASMS_OPENAI_API_KEY is not configured.'
-        );
     }
 
     $allowed_types = as_ms_allowed_types();
@@ -180,73 +289,36 @@ function as_ms_classify_data($rows) {
         . '- In Salesforce and WordPress, issues solved with clicks rather than code are usually Content/Config/Access.\n'
         . '- The most common categories are Content/Config/Access, Consulting/Investigation, then Break/Fix.';
 
-    $res = wp_remote_post('https://api.openai.com/v1/responses', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $api_key,
-            'Content-Type'  => 'application/json'
-        ],
-        'body' => wp_json_encode([
-            'model' => defined('ASMS_OPENAI_MODEL') ? ASMS_OPENAI_MODEL : 'gpt-5.4',
-            'instructions' => $instructions,
-            'input' => wp_json_encode(['items' => $payload]),
-            'text' => [
-                'format' => [
-                    'type'   => 'json_schema',
-                    'name'   => 'task_classifications',
-                    'strict' => true,
-                    'schema' => [
-                        'type'                 => 'object',
-                        'properties'           => [
-                            'classifications' => [
-                                'type'  => 'array',
-                                'items' => [
-                                    'type'                 => 'object',
-                                    'properties'           => [
-                                        'type' => [
-                                            'type' => 'string',
-                                            'enum' => $allowed_types,
-                                        ],
-                                    ],
-                                    'required'             => ['type'],
-                                    'additionalProperties' => false,
-                                ],
-                            ],
+    $schema = [
+        'type'                 => 'object',
+        'properties'           => [
+            'classifications' => [
+                'type'  => 'array',
+                'items' => [
+                    'type'                 => 'object',
+                    'properties'           => [
+                        'type' => [
+                            'type' => 'string',
+                            'enum' => $allowed_types,
                         ],
-                        'required'             => ['classifications'],
-                        'additionalProperties' => false,
                     ],
+                    'required'             => ['type'],
+                    'additionalProperties' => false,
                 ],
             ],
-            'store' => false,
-        ]),
-        'timeout' => 45
-    ]);
+        ],
+        'required'             => ['classifications'],
+        'additionalProperties' => false,
+    ];
 
-    if (is_wp_error($res)) {
-        return new WP_Error('asms_classification_request_failed', $res->get_error_message());
-    }
+    $text = asms_generate_ai_text(
+        wp_json_encode(['items' => $payload]),
+        $instructions,
+        $schema
+    );
 
-    $response_code = wp_remote_retrieve_response_code($res);
-    $response_body = wp_remote_retrieve_body($res);
-
-    if (200 > $response_code || 300 <= $response_code) {
-        $error_response = json_decode($response_body, true);
-        $error_message = $error_response['error']['message'] ?? 'The AI classification request failed.';
-
-        return new WP_Error('asms_classification_api_error', sanitize_text_field($error_message));
-    }
-
-    $json = json_decode($response_body, true);
-    $text = is_array($json) ? (string) ($json['output_text'] ?? '') : '';
-
-    if ('' === $text && !empty($json['output']) && is_array($json['output'])) {
-        foreach ($json['output'] as $output_item) {
-            foreach (($output_item['content'] ?? []) as $content_item) {
-                if ('output_text' === ($content_item['type'] ?? '') && isset($content_item['text'])) {
-                    $text .= (string) $content_item['text'];
-                }
-            }
-        }
+    if (is_wp_error($text)) {
+        return $text;
     }
 
     $decoded = json_decode($text, true);
@@ -322,50 +394,25 @@ function asms_reclassify_uncategorized_report_data($post_id) {
 }
 
 function as_ms_summarise_notes($notes) {
-
-    $api_key = asms_get_openai_api_key();
-
-    if (empty($notes) || '' === $api_key) {
+    if (empty($notes)) {
         return '';
     }
 
-    $res = wp_remote_post('https://api.openai.com/v1/responses', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $api_key,
-            'Content-Type'  => 'application/json'
-        ],
-        'body' => wp_json_encode([
-            'model' => defined('ASMS_OPENAI_MODEL') ? ASMS_OPENAI_MODEL : 'gpt-5.4',
-            'input' => wp_json_encode([
-                'instructions' =>
-                    'Create an high-level Executive Summary for the month based on these managed service timesheet notes for a monthly client report.
+    $instructions = 'Create a high-level executive summary for the month based on managed-services timesheet notes for a monthly client report.
 
 Output:
 1. A short 1-2 sentence narrative summary.
-2. a very short list of bullet points of key activity themes.
-4. Do not invent outcomes, dates, status, or completion.
-5. Do not include individual staff names unless essential.
-6. Keep the tone calm, professional, and useful.
-7. Be concise and use natural language and tone. 
+2. A very short list of bullet points covering key activity themes.
+3. Do not invent outcomes, dates, status, or completion.
+4. Do not include individual staff names unless essential.
+5. Keep the tone calm, professional, and useful.
+6. Be concise and use natural language.
 
-Return plain text only.',
-                'notes' => $notes
-            ])
-        ]),
-        'timeout' => 45
-    ]);
+Return plain text only.';
 
-    if (is_wp_error($res) || 200 > wp_remote_retrieve_response_code($res) || 300 <= wp_remote_retrieve_response_code($res)) {
-        return '';
-    }
+    $summary = asms_generate_ai_text((string) $notes, $instructions);
 
-    $json = json_decode(wp_remote_retrieve_body($res), true);
-
-    return trim(
-        $json['output'][0]['content'][0]['text']
-        ?? $json['output_text']
-        ?? ''
-    );
+    return is_wp_error($summary) ? '' : trim($summary);
 }
 
 

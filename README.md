@@ -1,7 +1,7 @@
 # AS Managed Services Reporting
 
 Author: AlphaSys  
-Version: 1.3.7<br>
+Version: 1.3.8<br>
 Status: Production
 
 AS Managed Services Reporting provides managed-services account reporting, related-user access controls, tab-separated data imports, and optional AI-assisted classification and summaries.
@@ -10,7 +10,9 @@ AS Managed Services Reporting provides managed-services account reporting, relat
 
 Upload `as-ms-reporting.zip` through **Plugins > Add New > Upload Plugin**, then activate it.
 
-For AI-assisted features, define the API key outside the plugin source. Either set an `ASMS_OPENAI_API_KEY` environment variable or add this to `wp-config.php`:
+On WordPress 7.0 or later, configure an AI provider under **Settings > Connectors**. The plugin uses the WordPress AI Client and the credentials held by that connector.
+
+On older WordPress versions, AI-assisted features can use the direct OpenAI fallback. Define the API key outside the plugin source by setting an `ASMS_OPENAI_API_KEY` environment variable or adding this to `wp-config.php`:
 
 ```php
 define( 'ASMS_OPENAI_API_KEY', 'your-key-from-a-secret-store' );

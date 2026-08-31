@@ -10,7 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Return the OpenAI API key supplied through wp-config.php or the environment.
+ * Return the fallback OpenAI API key supplied through wp-config.php or the environment.
+ *
+ * WordPress 7.0 and later use the WordPress AI Client and configured connector
+ * before this fallback is considered.
  *
  * @return string
  */
