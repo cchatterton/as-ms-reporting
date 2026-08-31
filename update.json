@@ -1,4 +1,4 @@
 {
-  "version": "1.3.8",
-  "body": "Uses the WordPress 7 AI Client and configured Settings > Connectors provider for category classification and monthly summaries, with direct OpenAI support retained as a fallback for older WordPress installations."
+  "version": "1.3.9",
+  "body": "Uses the native WordPress 7 AI Client exclusively for category classification and monthly summaries. The direct OpenAI API-key fallback has been removed."
 }

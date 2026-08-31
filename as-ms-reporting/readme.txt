@@ -1,9 +1,9 @@
 === AS Managed Services Reporting ===
 Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
-Requires at least: 6.0
+Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.3.8
+Stable tag: 1.3.9
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,17 +20,22 @@ The plugin supports native WordPress updates from its public GitHub releases.
 
 1. Upload `as-ms-reporting.zip` through Plugins > Add New > Upload Plugin.
 2. Activate AS Managed Services Reporting.
-3. On WordPress 7.0 or later, configure an AI provider under Settings > Connectors. On older versions, define `ASMS_OPENAI_API_KEY` in `wp-config.php` or the server environment.
+3. Configure an AI provider under Settings > Connectors. The plugin uses the native WordPress AI Client and does not accept or store an API key itself.
 
 == External services ==
 
-This plugin sends managed-services task descriptions, staff roles, and monthly notes through the WordPress AI Client when an authorised editor saves imported reporting data or notes. The configured WordPress connector selects the AI provider and manages its credentials. On WordPress versions without the AI Client, the plugin can send the same data directly to the OpenAI Responses API when `ASMS_OPENAI_API_KEY` is configured. This data is used to classify work and create report summaries.
+This plugin sends managed-services task descriptions, staff roles, and monthly notes through the native WordPress AI Client when an authorised editor saves imported reporting data or notes. The configured WordPress connector selects the AI provider and manages its credentials. The plugin does not access or store the provider API key directly. This data is used to classify work and create report summaries.
 
 OpenAI API terms: https://openai.com/policies/service-terms/
 
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.3.9 =
+
+* Required WordPress 7.0 and used its native AI Client exclusively.
+* Removed the direct OpenAI API-key fallback and its configuration helper.
 
 = 1.3.8 =
 

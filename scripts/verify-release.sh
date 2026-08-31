@@ -2,16 +2,17 @@
 set -euo pipefail
 
 PLUGIN_SLUG="as-ms-reporting"
-EXPECTED_VERSION="1.3.8"
+EXPECTED_VERSION="1.3.9"
 REPOSITORY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGIN_DIR="$REPOSITORY_DIR/$PLUGIN_SLUG"
 MAIN_FILE="$PLUGIN_DIR/$PLUGIN_SLUG.php"
 ZIP_FILE="$REPOSITORY_DIR/$PLUGIN_SLUG.zip"
 
 grep -q "^ \* Version: $EXPECTED_VERSION$" "$MAIN_FILE"
+grep -q '^ \* Requires at least: 7.0$' "$MAIN_FILE"
 grep -q "define( 'ASMS_VERSION', '$EXPECTED_VERSION' );" "$MAIN_FILE"
 grep -q "^Stable tag: $EXPECTED_VERSION$" "$PLUGIN_DIR/readme.txt"
-grep -q '"version": "1.3.8"' "$REPOSITORY_DIR/update.json"
+grep -q '"version": "1.3.9"' "$REPOSITORY_DIR/update.json"
 grep -q '^ \* Update URI: https://github.com/cchatterton/as-ms-reporting$' "$MAIN_FILE"
 
 if grep -q '^ \* Plugin URI:' "$MAIN_FILE"; then
@@ -23,6 +24,13 @@ if grep -REq 'sk-[A-Za-z0-9_-]{20,}' "$PLUGIN_DIR"; then
     echo "A likely API key was found in the plugin package." >&2
     exit 1
 fi
+
+if grep -REq 'ASMS_OPENAI_API_KEY|api\.openai\.com' "$PLUGIN_DIR" --include='*.php'; then
+    echo "A direct OpenAI credential or endpoint reference was found in the plugin PHP." >&2
+    exit 1
+fi
+
+test ! -f "$PLUGIN_DIR/functions/config.php"
 
 while IFS= read -r php_file; do
     php -l "$php_file" >/dev/null

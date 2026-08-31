@@ -2,8 +2,8 @@
 /**
  * Plugin Name: AS Managed Services Reporting
  * Description: Provides managed-services account reporting, access controls, data imports, and AI-assisted summaries.
- * Version: 1.3.8
- * Requires at least: 6.0
+ * Version: 1.3.9
+ * Requires at least: 7.0
  * Requires PHP: 8.1
  * Update URI: https://github.com/cchatterton/as-ms-reporting
  * Author: AlphaSys
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ASMS_VERSION', '1.3.8' );
+define( 'ASMS_VERSION', '1.3.9' );
 define( 'ASMS_PLUGIN_FILE', __FILE__ );
 define( 'ASMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ASMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -27,7 +27,6 @@ if ( ! defined( 'ASMS_OPENAI_MODEL' ) ) {
 }
 
 $asms_function_files = array(
-	'config.php',
 	'assets.php',
 	'cpt-meta.php',
 	'templates.php',

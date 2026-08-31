@@ -2,6 +2,11 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.3.9 - 2026-08-31
+
+- Required WordPress 7.0 and routed all AI operations exclusively through its native AI Client.
+- Removed the direct OpenAI Responses API fallback and `ASMS_OPENAI_API_KEY` configuration helper.
+
 ## 1.3.8 - 2026-08-31
 
 - Routed AI category classification and monthly summary generation through the WordPress 7 AI Client and its configured Settings > Connectors provider.

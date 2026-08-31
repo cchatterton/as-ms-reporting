@@ -132,7 +132,7 @@ function as_ms_parse_csv($raw, $post_id) {
 // ==========================
 
 /**
- * Generate text through the WordPress 7 AI Client, with direct OpenAI fallback.
+ * Generate text through the WordPress 7 AI Client.
  *
  * @param string     $input        User input.
  * @param string     $instructions System instructions.
@@ -140,108 +140,34 @@ function as_ms_parse_csv($raw, $post_id) {
  * @return string|WP_Error
  */
 function asms_generate_ai_text($input, $instructions, $schema = null) {
-    $wordpress_ai_error = null;
-
-    if (function_exists('wp_ai_client_prompt')) {
-        try {
-            $builder = wp_ai_client_prompt($input)
-                ->using_system_instruction($instructions);
-
-            if (defined('ASMS_OPENAI_MODEL') && ASMS_OPENAI_MODEL) {
-                $builder = $builder->using_model_preference(ASMS_OPENAI_MODEL);
-            }
-
-            if (is_array($schema)) {
-                $builder = $builder->as_json_response($schema);
-            }
-
-            $result = $builder->generate_text();
-
-            if (!is_wp_error($result)) {
-                return trim((string) $result);
-            }
-
-            $wordpress_ai_error = $result;
-        } catch (Throwable $error) {
-            $wordpress_ai_error = new WP_Error(
-                'asms_wordpress_ai_client_error',
-                $error->getMessage()
-            );
-        }
-    }
-
-    $api_key = asms_get_openai_api_key();
-
-    if ('' === $api_key) {
-        if (is_wp_error($wordpress_ai_error)) {
-            return $wordpress_ai_error;
-        }
-
+    if (!function_exists('wp_ai_client_prompt')) {
         return new WP_Error(
-            'asms_ai_unavailable',
-            'No configured WordPress AI connector or ASMS_OPENAI_API_KEY was available.'
+            'asms_wordpress_ai_client_unavailable',
+            'The WordPress AI Client is unavailable. WordPress 7.0 or later is required.'
         );
     }
 
-    $request_body = [
-        'model'        => defined('ASMS_OPENAI_MODEL') ? ASMS_OPENAI_MODEL : 'gpt-5.4',
-        'instructions' => $instructions,
-        'input'        => $input,
-        'store'        => false,
-    ];
+    try {
+        $builder = wp_ai_client_prompt($input)
+            ->using_system_instruction($instructions);
 
-    if (is_array($schema)) {
-        $request_body['text'] = [
-            'format' => [
-                'type'   => 'json_schema',
-                'name'   => 'asms_response',
-                'strict' => true,
-                'schema' => $schema,
-            ],
-        ];
-    }
-
-    $response = wp_remote_post('https://api.openai.com/v1/responses', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $api_key,
-            'Content-Type'  => 'application/json',
-        ],
-        'body'    => wp_json_encode($request_body),
-        'timeout' => 45,
-    ]);
-
-    if (is_wp_error($response)) {
-        return $response;
-    }
-
-    $response_code = wp_remote_retrieve_response_code($response);
-    $response_body = wp_remote_retrieve_body($response);
-
-    if (200 > $response_code || 300 <= $response_code) {
-        $error_response = json_decode($response_body, true);
-        $error_message = $error_response['error']['message'] ?? 'The AI request failed.';
-
-        return new WP_Error('asms_ai_api_error', sanitize_text_field($error_message));
-    }
-
-    $json = json_decode($response_body, true);
-    $text = is_array($json) ? (string) ($json['output_text'] ?? '') : '';
-
-    if ('' === $text && !empty($json['output']) && is_array($json['output'])) {
-        foreach ($json['output'] as $output_item) {
-            foreach (($output_item['content'] ?? []) as $content_item) {
-                if ('output_text' === ($content_item['type'] ?? '') && isset($content_item['text'])) {
-                    $text .= (string) $content_item['text'];
-                }
-            }
+        if (defined('ASMS_OPENAI_MODEL') && ASMS_OPENAI_MODEL) {
+            $builder = $builder->using_model_preference(ASMS_OPENAI_MODEL);
         }
+
+        if (is_array($schema)) {
+            $builder = $builder->as_json_response($schema);
+        }
+
+        $result = $builder->generate_text();
+    } catch (Throwable $error) {
+        return new WP_Error(
+            'asms_wordpress_ai_client_error',
+            $error->getMessage()
+        );
     }
 
-    if ('' === trim($text)) {
-        return new WP_Error('asms_ai_empty_response', 'The AI provider returned an empty response.');
-    }
-
-    return trim($text);
+    return is_wp_error($result) ? $result : trim((string) $result);
 }
 
 
