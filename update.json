@@ -1,4 +1,4 @@
 {
-  "version": "1.3.6",
-  "body": "Adopted the latest shortcode and CSS presentation changes and added AlphaSys-only card edit links that open in a new tab."
+  "version": "1.3.7",
+  "body": "Fixed category classification, added automatic repair for existing blank categories, and surfaced classification errors instead of silently saving incomplete data."
 }

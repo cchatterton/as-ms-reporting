@@ -81,6 +81,14 @@ add_action('add_meta_boxes', function() {
 
     add_meta_box('ms_report_data', 'Report Data (JSON)', function($p){
 
+        $classification_error = get_post_meta($p->ID, 'ms_classification_error', true);
+
+        if ($classification_error) {
+            echo '<p class="notice notice-error inline"><strong>AI classification error:</strong> '
+                . esc_html($classification_error)
+                . ' Save the account to retry.</p>';
+        }
+
         echo '<textarea class="ms-meta-field" name="ms_report_data_json">'
             . esc_textarea(get_post_meta($p->ID,'ms_report_data_json',true))
             . '</textarea>';
@@ -358,6 +366,13 @@ if (!empty($missing)) {
 
         $parsed = as_ms_classify_data($parsed);
 
+        if (is_wp_error($parsed)) {
+            update_post_meta($id, 'ms_classification_error', $parsed->get_error_message());
+            return;
+        }
+
+        delete_post_meta($id, 'ms_classification_error');
+
         $existing = json_decode(get_post_meta($id,'ms_report_data_json',true),true) ?: [];
 
         $merged = as_ms_dedupe_rows($existing, $parsed);
@@ -366,6 +381,16 @@ if (!empty($missing)) {
 
         delete_post_meta($id,'ms_csv_import');
         delete_post_meta($id,'ms_missing_names');
+    }
+
+    // Repair rows previously saved without a valid category. This runs when an
+    // editor saves the account, so no AI request is made from the front end.
+    $reclassified = asms_reclassify_uncategorized_report_data($id);
+
+    if (is_wp_error($reclassified)) {
+        update_post_meta($id, 'ms_classification_error', $reclassified->get_error_message());
+    } else {
+        delete_post_meta($id, 'ms_classification_error');
     }
 
 });

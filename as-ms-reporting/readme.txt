@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,12 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.3.7 =
+
+* Fixed AI category classification by using strict structured output and robust response extraction.
+* Reclassified previously saved rows with blank categories when an account is saved.
+* Displayed classification failures in the account editor instead of silently saving blank categories.
 
 = 1.3.6 =
 

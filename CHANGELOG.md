@@ -2,6 +2,13 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.3.7 - 2026-08-31
+
+- Fixed category classification by requesting strict structured output and extracting Responses API output robustly.
+- Automatically reclassified previously saved report rows with blank or unsupported categories when the account is saved.
+- Preserved failed CSV imports for retry and displayed the classification error in the account editor.
+- Counted any still-unclassified legacy rows under Other until reclassification succeeds.
+
 ## 1.3.6 - 2026-08-31
 
 - Adopted the latest supplied shortcode and CSS presentation changes.

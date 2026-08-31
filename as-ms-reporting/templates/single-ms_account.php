@@ -100,8 +100,10 @@ foreach ($data as $r) {
     $months[$m]['role'][$r['role']] =
         ($months[$m]['role'][$r['role']] ?? 0) + $amount;
 
-    $months[$m]['type'][$r['type']] =
-        ($months[$m]['type'][$r['type']] ?? 0) + $amount;
+    $type = !empty($r['type']) ? $r['type'] : 'Other';
+
+    $months[$m]['type'][$type] =
+        ($months[$m]['type'][$type] ?? 0) + $amount;
 }
 
 
