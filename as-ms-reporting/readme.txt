@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.3.0
+Stable tag: 1.3.2
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,15 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.3.2 =
+
+* Ensured account-card styles load when the shortcode is rendered by a page builder or template.
+
+= 1.3.1 =
+
+* Replaced the related-account list with monthly grouped pace cards.
+* Added external related users to each account card.
 
 = 1.3.0 =
 

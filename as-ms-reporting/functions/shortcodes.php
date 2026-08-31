@@ -80,17 +80,280 @@ function ms_related_accounts_shortcode() {
         return '<p>No accounts found.</p>';
     }
 
-    $output = '<ul class="ms-related-accounts">';
+    $grouped_accounts = [];
 
     foreach ($accounts as $account) {
-        $output .= sprintf(
-            '<li><a href="%s">%s</a></li>',
-            esc_url(get_permalink($account->ID)),
-            esc_html(get_the_title($account->ID))
-        );
+        $card_data = asms_get_account_card_data($account->ID);
+        $group_key = $card_data['latest_month'] ?: 'no-data';
+
+        if (!isset($grouped_accounts[$group_key])) {
+            $grouped_accounts[$group_key] = [];
+        }
+
+        $grouped_accounts[$group_key][] = [
+            'account' => $account,
+            'data'    => $card_data,
+        ];
     }
 
-    $output .= '</ul>';
+    uksort($grouped_accounts, function($first, $second) {
+        if ('no-data' === $first) {
+            return 1;
+        }
+
+        if ('no-data' === $second) {
+            return -1;
+        }
+
+        return strcmp($second, $first);
+    });
+
+    $output = '<div class="ms-related-accounts">';
+
+    foreach ($grouped_accounts as $month => $group_accounts) {
+        $month_label = 'no-data' === $month
+            ? 'No data available'
+            : 'Data up to ' . wp_date('F Y', strtotime($month . '-01'));
+
+        $output .= '<section class="ms-account-group">';
+        $output .= '<h2 class="ms-account-group-title">' . esc_html($month_label) . '</h2>';
+        $output .= '<div class="ms-account-card-grid">';
+
+        foreach ($group_accounts as $group_account) {
+            $output .= asms_render_account_card(
+                $group_account['account'],
+                $group_account['data']
+            );
+        }
+
+        $output .= '</div></section>';
+    }
+
+    $output .= '</div>';
+
+    return $output;
+}
+
+/**
+ * Calculate the pace data shown on an account card.
+ *
+ * @param int $account_id Account post ID.
+ * @return array<string, mixed>
+ */
+function asms_get_account_card_data($account_id) {
+    $data = as_ms_get_report_data($account_id);
+    $plan = (float) get_post_meta($account_id, 'ms_monthly_plan', true);
+    $vars = json_decode(get_post_meta($account_id, 'ms_variations_json', true), true);
+    $vars = is_array($vars) ? $vars : [];
+
+    $dated_rows = array_filter($data, function($row) {
+        return !empty($row['date']) && false !== strtotime($row['date']);
+    });
+
+    $timestamps = array_map(function($row) {
+        return strtotime($row['date']);
+    }, $dated_rows);
+
+    $latest_timestamp = $timestamps ? max($timestamps) : null;
+    $latest_month = $latest_timestamp ? wp_date('Y-m', $latest_timestamp) : '';
+
+    if ($timestamps) {
+        $start_timestamp = min($timestamps);
+        $start = new DateTime(wp_date('Y-m-01', $start_timestamp));
+    } else {
+        $start = new DateTime('first day of this month');
+    }
+
+    $months = [];
+
+    for ($index = 1; $index <= 12; $index++) {
+        $month_key = $start->format('Y-m');
+        $months[$month_key] = [
+            'actual'    => 0,
+            'variation' => 0,
+            'override'  => get_post_meta($account_id, 'ms_month_override_' . $index, true),
+        ];
+        $start->modify('+1 month');
+    }
+
+    foreach ($dated_rows as $row) {
+        $month_key = wp_date('Y-m', strtotime($row['date']));
+
+        if (isset($months[$month_key])) {
+            $months[$month_key]['actual'] += (float) ($row['amount'] ?? 0);
+        }
+    }
+
+    foreach ($vars as $variation) {
+        if (empty($variation['date']) || false === strtotime($variation['date'])) {
+            continue;
+        }
+
+        $month_key = wp_date('Y-m', strtotime($variation['date']));
+
+        if (isset($months[$month_key])) {
+            $months[$month_key]['variation'] += (float) ($variation['amount'] ?? 0);
+        }
+    }
+
+    $actual_to_date = 0;
+    $months_delivered = 0;
+    $total_variations = 0;
+
+    foreach ($months as $month) {
+        $actual = '' !== $month['override'] && null !== $month['override']
+            ? (float) str_replace(',', '', (string) $month['override'])
+            : $month['actual'];
+
+        if ($actual > 0) {
+            $actual_to_date += $actual;
+            $months_delivered++;
+        }
+
+        $total_variations += $month['variation'];
+    }
+
+    $current_tcv = ($plan * 12) + $total_variations;
+    $remaining_balance = $current_tcv - $actual_to_date;
+    $months_remaining = max(12 - $months_delivered, 0);
+    $suggested_pace = $months_remaining ? $remaining_balance / $months_remaining : 0;
+    $current_rolling_average = $months_delivered ? $actual_to_date / $months_delivered : 0;
+    $guidance = 'Stay the Course';
+
+    if ($remaining_balance < 0) {
+        $guidance = 'Decrease Pace';
+    } elseif ($months_remaining <= 0) {
+        $guidance = 'Closed';
+    } elseif ($suggested_pace <= 0) {
+        $guidance = 'Decrease Pace';
+    } elseif ($current_rolling_average > ($suggested_pace * 1.1)) {
+        $guidance = 'Decrease Pace';
+    } elseif ($current_rolling_average < ($suggested_pace * 0.9)) {
+        $guidance = 'Increase Pace';
+    }
+
+    return [
+        'latest_month'           => $latest_month,
+        'current_tcv'            => $current_tcv,
+        'actual_to_date'         => $actual_to_date,
+        'remaining_balance'      => $remaining_balance,
+        'months_delivered'       => $months_delivered,
+        'suggested_pace'         => $suggested_pace,
+        'current_rolling_average' => $current_rolling_average,
+        'guidance'               => $guidance,
+        'related_users'          => asms_get_external_related_users($account_id),
+    ];
+}
+
+/**
+ * Return related users whose email address is not an AlphaSys address.
+ *
+ * @param int $account_id Account post ID.
+ * @return WP_User[]
+ */
+function asms_get_external_related_users($account_id) {
+    $user_ids = get_post_meta($account_id, 'ms_related_users', true);
+
+    if (!is_array($user_ids)) {
+        return [];
+    }
+
+    $users = [];
+
+    foreach (array_unique(array_map('absint', $user_ids)) as $user_id) {
+        $user = get_userdata($user_id);
+
+        if (!$user || false !== stripos($user->user_email, 'alphasys.com.au')) {
+            continue;
+        }
+
+        $users[] = $user;
+    }
+
+    usort($users, function($first, $second) {
+        return strcasecmp($first->display_name, $second->display_name);
+    });
+
+    return $users;
+}
+
+/**
+ * Format a monetary value for the account card.
+ *
+ * @param float $value Monetary value.
+ * @return string
+ */
+function asms_card_money($value) {
+    return '$' . number_format((float) $value, 0);
+}
+
+/**
+ * Render a single account pace card.
+ *
+ * @param WP_Post              $account Account post.
+ * @param array<string, mixed> $data    Calculated card data.
+ * @return string
+ */
+function asms_render_account_card($account, $data) {
+    $rows = [
+        'Current TCV'             => asms_card_money($data['current_tcv']),
+        'Actual to Date'          => asms_card_money($data['actual_to_date']),
+        'Remaining Balance'       => asms_card_money($data['remaining_balance']),
+        'Months Delivered'        => absint($data['months_delivered']) . ' of 12',
+        'Suggested Monthly Pace'  => asms_card_money($data['suggested_pace']),
+        'Current Rolling Average' => asms_card_money($data['current_rolling_average']),
+        'Guidance'                => $data['guidance'],
+    ];
+
+    $output = '<article class="ms-summary-card ms-account-card">';
+    $output .= sprintf(
+        '<h2><a href="%s">%s</a></h2>',
+        esc_url(get_permalink($account->ID)),
+        esc_html(get_the_title($account->ID))
+    );
+    $output .= '<table class="ms-guidance-table"><tbody>';
+
+    foreach ($rows as $label => $value) {
+        $classes = [];
+
+        if ('Remaining Balance' === $label && $data['remaining_balance'] < 0) {
+            $classes[] = 'ms-negative';
+        }
+
+        if ('Guidance' === $label) {
+            $classes[] = 'ms-guidance-result';
+        }
+
+        $class_attribute = $classes
+            ? ' class="' . esc_attr(implode(' ', $classes)) . '"'
+            : '';
+
+        $output .= '<tr><td>' . esc_html($label) . '</td><td' . $class_attribute . '>'
+            . esc_html($value) . '</td></tr>';
+    }
+
+    $output .= '</tbody></table>';
+    $output .= '<div class="ms-account-users"><h3>Related Users</h3>';
+
+    if ($data['related_users']) {
+        $output .= '<ul>';
+
+        foreach ($data['related_users'] as $user) {
+            $label = $user->display_name;
+
+            if ($user->user_email) {
+                $label .= ' (' . $user->user_email . ')';
+            }
+
+            $output .= '<li>' . esc_html($label) . '</li>';
+        }
+
+        $output .= '</ul>';
+    } else {
+        $output .= '<p class="ms-empty">No external related users.</p>';
+    }
+
+    $output .= '</div></article>';
 
     return $output;
 }

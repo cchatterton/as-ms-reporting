@@ -10,12 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Enqueue report assets only on managed-services account pages.
+ * Enqueue the lightweight report stylesheet on the front end.
+ *
+ * The account-list shortcode can be rendered by page builders, widgets, or
+ * templates, where its shortcode is not present in the queried post content.
+ * Loading the stylesheet globally ensures those cards are always styled.
  */
 function asms_enqueue_report_assets() {
-	if ( ! is_singular( 'ms_account' ) ) {
-		return;
-	}
+	$is_account_page = is_singular( 'ms_account' );
 
 	wp_enqueue_style(
 		'asms-report',
@@ -23,6 +25,10 @@ function asms_enqueue_report_assets() {
 		array(),
 		ASMS_VERSION
 	);
+
+	if ( ! $is_account_page ) {
+		return;
+	}
 
 	wp_enqueue_script(
 		'asms-chart',
