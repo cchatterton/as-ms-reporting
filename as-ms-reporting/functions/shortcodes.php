@@ -113,7 +113,7 @@ function ms_related_accounts_shortcode() {
     foreach ($grouped_accounts as $month => $group_accounts) {
         $month_label = 'no-data' === $month
             ? 'No data available'
-            : 'Data up to ' . wp_date('F Y', strtotime($month . '-01'));
+            : 'Report Month: ' . wp_date('F Y', strtotime($month . '-01'));
 
         $output .= '<section class="ms-account-group">';
         $output .= '<h2 class="ms-account-group-title">' . esc_html($month_label) . '</h2>';
@@ -129,7 +129,131 @@ function ms_related_accounts_shortcode() {
         $output .= '</div></section>';
     }
 
+    if (asms_current_user_can_view_account_totals()) {
+        $output .= '<section class="ms-account-group ms-account-totals-group">';
+        $output .= '<div class="ms-account-card-grid">';
+        $output .= asms_render_accounts_total_card(
+            asms_get_accounts_summary($grouped_accounts)
+        );
+        $output .= '</div></section>';
+    }
+
     $output .= '</div>';
+
+    return $output;
+}
+
+/**
+ * Check whether the current user can see portfolio-wide account totals.
+ *
+ * @return bool
+ */
+function asms_current_user_can_view_account_totals() {
+    $user = wp_get_current_user();
+
+    if (!$user || !$user->exists()) {
+        return false;
+    }
+
+    return false !== stripos((string) $user->user_login, 'alphasys.com.au')
+        || false !== stripos((string) $user->user_email, 'alphasys.com.au');
+}
+
+/**
+ * Aggregate all account cards into portfolio totals.
+ *
+ * @param array<string, array<int, array<string, mixed>>> $grouped_accounts Grouped cards.
+ * @return array<string, mixed>
+ */
+function asms_get_accounts_summary($grouped_accounts) {
+    $summary = [
+        'current_tcv'       => 0,
+        'actual_to_date'    => 0,
+        'remaining_balance' => 0,
+        'suggested_pace'    => 0,
+        'months_delivered'  => array_fill(0, 13, 0),
+        'guidance'          => [
+            'Increase Pace'   => 0,
+            'Stay the Course' => 0,
+            'Decrease Pace'   => 0,
+            'Closed'          => 0,
+        ],
+    ];
+
+    foreach ($grouped_accounts as $group_accounts) {
+        foreach ($group_accounts as $group_account) {
+            $data = $group_account['data'];
+            $months_delivered = min(12, max(0, absint($data['months_delivered'])));
+
+            $summary['current_tcv'] += (float) $data['current_tcv'];
+            $summary['actual_to_date'] += (float) $data['actual_to_date'];
+            $summary['remaining_balance'] += (float) $data['remaining_balance'];
+            $summary['suggested_pace'] += (float) $data['suggested_pace'];
+            $summary['months_delivered'][$months_delivered]++;
+
+            if (isset($summary['guidance'][$data['guidance']])) {
+                $summary['guidance'][$data['guidance']]++;
+            }
+        }
+    }
+
+    return $summary;
+}
+
+/**
+ * Render the AlphaSys-only portfolio totals card.
+ *
+ * @param array<string, mixed> $summary Aggregated card data.
+ * @return string
+ */
+function asms_render_accounts_total_card($summary) {
+    $rows = [
+        'Total TCV'                    => asms_card_money($summary['current_tcv']),
+        'Total Actual to Date'         => asms_card_money($summary['actual_to_date']),
+        'Total Remaining Budget'       => asms_card_money($summary['remaining_balance']),
+        'Total Suggested Monthly Pace' => asms_card_money($summary['suggested_pace']),
+    ];
+
+    foreach ($summary['months_delivered'] as $months => $count) {
+        if (0 === $months && 0 === $count) {
+            continue;
+        }
+
+        $label = 1 === $months
+            ? '1 Month Delivered'
+            : $months . ' Months Delivered';
+        $rows[$label] = $count;
+    }
+
+    foreach ($summary['guidance'] as $guidance => $count) {
+        $rows[$guidance] = $count;
+    }
+
+    $output = '<article class="ms-summary-card ms-account-card ms-account-total-card">';
+    $output .= '<h2>Portfolio Totals</h2>';
+    $output .= '<table class="ms-guidance-table"><tbody>';
+
+    foreach ($rows as $label => $value) {
+        $classes = [];
+
+        if ('Total Remaining Budget' === $label && $summary['remaining_balance'] < 0) {
+            $classes[] = 'ms-negative';
+        }
+
+        if (isset($summary['guidance'][$label])) {
+            $classes[] = 'ms-guidance-result';
+            $classes[] = $label;
+        }
+
+        $class_attribute = $classes
+            ? ' class="' . esc_attr(implode(' ', $classes)) . '"'
+            : '';
+
+        $output .= '<tr><td>' . esc_html($label) . '</td><td' . $class_attribute . '>'
+            . esc_html($value) . '</td></tr>';
+    }
+
+    $output .= '</tbody></table></article>';
 
     return $output;
 }
@@ -321,7 +445,7 @@ function asms_render_account_card($account, $data) {
         }
 
         if ('Guidance' === $label) {
-            $classes[] = 'ms-guidance-result';
+            $classes[] = 'ms-guidance-result ' . $value;
         }
 
         $class_attribute = $classes
@@ -333,7 +457,7 @@ function asms_render_account_card($account, $data) {
     }
 
     $output .= '</tbody></table>';
-    $output .= '<div class="ms-account-users"><h3>Related Users</h3>';
+    $output .= '<div class="ms-account-users">';
 
     if ($data['related_users']) {
         $output .= '<ul>';
@@ -341,9 +465,9 @@ function asms_render_account_card($account, $data) {
         foreach ($data['related_users'] as $user) {
             $label = $user->display_name;
 
-            if ($user->user_email) {
-                $label .= ' (' . $user->user_email . ')';
-            }
+            // if ($user->user_email) {
+            //     $label .= ' (' . $user->user_email . ')';
+            // }
 
             $output .= '<li>' . esc_html($label) . '</li>';
         }

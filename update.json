@@ -1,4 +1,4 @@
 {
-  "version": "1.3.3",
-  "body": "Limited account cards to three per desktop row and matched card heights within each month group, with responsive tablet and mobile layouts."
+  "version": "1.3.4",
+  "body": "Adopted the latest account-card display changes and added an AlphaSys-only portfolio totals card with financial, delivery-month, and guidance aggregates."
 }

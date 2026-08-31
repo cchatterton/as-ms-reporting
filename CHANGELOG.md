@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.3.4 - 2026-08-31
+
+- Adopted the latest account-card display changes supplied for the related-accounts shortcode.
+- Added a portfolio totals card after the account groups, visible only when the current viewer's WordPress login or email contains `alphasys.com.au`.
+- Aggregated TCV, actuals, remaining budget, suggested pace, account counts by delivered month, and guidance counts.
+
 ## 1.3.3 - 2026-08-31
 
 - Limited account cards to one-third of the desktop row, with responsive two- and one-column layouts.
