@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,11 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.3.6 =
+
+* Adopted the latest shortcode and CSS presentation changes.
+* Added an AlphaSys-only edit icon to account cards that opens the WordPress editor in a new tab.
 
 = 1.3.5 =
 

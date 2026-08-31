@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.3.6 - 2026-08-31
+
+- Adopted the latest supplied shortcode and CSS presentation changes.
+- Added an accessible edit icon to the top-right of each account card for AlphaSys viewers.
+- Opened card edit links in a new browser tab.
+
 ## 1.3.5 - 2026-08-31
 
 - Simplified the portfolio card to TCV, actual-to-date, remaining budget, and suggested monthly pace totals.

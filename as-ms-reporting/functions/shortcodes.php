@@ -261,11 +261,11 @@ function asms_render_accounts_heatmaps($summary) {
 
     $output = '<div class="ms-portfolio-heatmaps">';
     $output .= asms_render_accounts_heatmap_table(
-        'Customers by Months Delivered',
+        'Months',
         $month_counts
     );
     $output .= asms_render_accounts_heatmap_table(
-        'Customers by Pace Guidance',
+        'Pace',
         $guidance_counts
     );
     $output .= '</div>';
@@ -282,8 +282,7 @@ function asms_render_accounts_heatmaps($summary) {
  */
 function asms_render_accounts_heatmap_table($title, $counts) {
     $maximum = $counts ? max($counts) : 0;
-    $output = '<section class="ms-portfolio-heatmap">';
-    $output .= '<h3>' . esc_html($title) . '</h3>';
+    $output = '<section class="ms-portfolio-heatmap ' . esc_attr($title) . '">';
     $output .= '<table><thead><tr>';
 
     foreach ($counts as $label => $count) {
@@ -477,6 +476,24 @@ function asms_render_account_card($account, $data) {
     ];
 
     $output = '<article class="ms-summary-card ms-account-card">';
+
+    if (asms_current_user_can_view_account_totals()) {
+        $edit_url = get_edit_post_link($account->ID, '');
+
+        if ($edit_url) {
+            $edit_label = sprintf(
+                'Edit %s',
+                get_the_title($account->ID)
+            );
+            $output .= '<a class="ms-account-edit" href="' . esc_url($edit_url)
+                . '" target="_blank" rel="noopener noreferrer" aria-label="'
+                . esc_attr($edit_label) . '" title="' . esc_attr($edit_label) . '">';
+            $output .= '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+                . '<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>'
+                . '</svg></a>';
+        }
+    }
+
     $output .= sprintf(
         '<h2><a href="%s">%s</a></h2>',
         esc_url(get_permalink($account->ID)),

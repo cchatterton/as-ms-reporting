@@ -1,4 +1,4 @@
 {
-  "version": "1.3.5",
-  "body": "Simplified the portfolio totals card and added AlphaSys-only green heatmaps for customer counts by months delivered and pace guidance."
+  "version": "1.3.6",
+  "body": "Adopted the latest shortcode and CSS presentation changes and added AlphaSys-only card edit links that open in a new tab."
 }
