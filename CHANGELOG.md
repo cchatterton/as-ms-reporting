@@ -2,6 +2,11 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.3.3 - 2026-08-31
+
+- Limited account cards to one-third of the desktop row, with responsive two- and one-column layouts.
+- Matched all card heights within each month group to its tallest card.
+
 ## 1.3.2 - 2026-08-31
 
 - Ensured account-card styles load when the shortcode is rendered outside the queried page content, including through page builders, widgets, and templates.
