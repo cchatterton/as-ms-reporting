@@ -130,12 +130,15 @@ function ms_related_accounts_shortcode() {
     }
 
     if (asms_current_user_can_view_account_totals()) {
+        $summary = asms_get_accounts_summary($grouped_accounts);
+
         $output .= '<section class="ms-account-group ms-account-totals-group">';
+        $output .= '<h2 class="ms-account-group-title">Portfolio Totals</h2>';
         $output .= '<div class="ms-account-card-grid">';
-        $output .= asms_render_accounts_total_card(
-            asms_get_accounts_summary($grouped_accounts)
-        );
-        $output .= '</div></section>';
+        $output .= asms_render_accounts_total_card($summary);
+        $output .= '</div>';
+        $output .= asms_render_accounts_heatmaps($summary);
+        $output .= '</section>';
     }
 
     $output .= '</div>';
@@ -214,23 +217,7 @@ function asms_render_accounts_total_card($summary) {
         'Total Suggested Monthly Pace' => asms_card_money($summary['suggested_pace']),
     ];
 
-    foreach ($summary['months_delivered'] as $months => $count) {
-        if (0 === $months && 0 === $count) {
-            continue;
-        }
-
-        $label = 1 === $months
-            ? '1 Month Delivered'
-            : $months . ' Months Delivered';
-        $rows[$label] = $count;
-    }
-
-    foreach ($summary['guidance'] as $guidance => $count) {
-        $rows[$guidance] = $count;
-    }
-
     $output = '<article class="ms-summary-card ms-account-card ms-account-total-card">';
-    $output .= '<h2>Portfolio Totals</h2>';
     $output .= '<table class="ms-guidance-table"><tbody>';
 
     foreach ($rows as $label => $value) {
@@ -238,11 +225,6 @@ function asms_render_accounts_total_card($summary) {
 
         if ('Total Remaining Budget' === $label && $summary['remaining_balance'] < 0) {
             $classes[] = 'ms-negative';
-        }
-
-        if (isset($summary['guidance'][$label])) {
-            $classes[] = 'ms-guidance-result';
-            $classes[] = $label;
         }
 
         $class_attribute = $classes
@@ -254,6 +236,71 @@ function asms_render_accounts_total_card($summary) {
     }
 
     $output .= '</tbody></table></article>';
+
+    return $output;
+}
+
+/**
+ * Render the AlphaSys-only delivery and guidance heatmap tables.
+ *
+ * @param array<string, mixed> $summary Aggregated card data.
+ * @return string
+ */
+function asms_render_accounts_heatmaps($summary) {
+    $month_counts = [];
+
+    for ($month = 1; $month <= 12; $month++) {
+        $month_counts['Month ' . $month] = $summary['months_delivered'][$month] ?? 0;
+    }
+
+    $guidance_counts = [
+        'Increase Pace'   => $summary['guidance']['Increase Pace'] ?? 0,
+        'Stay the Course' => $summary['guidance']['Stay the Course'] ?? 0,
+        'Decrease Pace'   => $summary['guidance']['Decrease Pace'] ?? 0,
+    ];
+
+    $output = '<div class="ms-portfolio-heatmaps">';
+    $output .= asms_render_accounts_heatmap_table(
+        'Customers by Months Delivered',
+        $month_counts
+    );
+    $output .= asms_render_accounts_heatmap_table(
+        'Customers by Pace Guidance',
+        $guidance_counts
+    );
+    $output .= '</div>';
+
+    return $output;
+}
+
+/**
+ * Render a single-row customer-count heatmap table.
+ *
+ * @param string             $title  Table title.
+ * @param array<string, int> $counts Labelled customer counts.
+ * @return string
+ */
+function asms_render_accounts_heatmap_table($title, $counts) {
+    $maximum = $counts ? max($counts) : 0;
+    $output = '<section class="ms-portfolio-heatmap">';
+    $output .= '<h3>' . esc_html($title) . '</h3>';
+    $output .= '<table><thead><tr>';
+
+    foreach ($counts as $label => $count) {
+        $output .= '<th scope="col">' . esc_html($label) . '</th>';
+    }
+
+    $output .= '</tr></thead><tbody><tr>';
+
+    foreach ($counts as $count) {
+        $alpha = $maximum > 0 ? (float) $count / $maximum : 0;
+        $background = 'rgba(0, 128, 0, ' . number_format($alpha, 3, '.', '') . ')';
+
+        $output .= '<td class="ms-heat-cell" style="background-color: '
+            . esc_attr($background) . '">' . esc_html($count) . '</td>';
+    }
+
+    $output .= '</tr></tbody></table></section>';
 
     return $output;
 }

@@ -2,6 +2,13 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.3.5 - 2026-08-31
+
+- Simplified the portfolio card to TCV, actual-to-date, remaining budget, and suggested monthly pace totals.
+- Added AlphaSys-only green heatmaps for customer counts by months delivered and pace guidance.
+- Used equal-width fixed-layout columns in both heatmap tables.
+- Moved Portfolio Totals from inside the card to a report-style section heading.
+
 ## 1.3.4 - 2026-08-31
 
 - Adopted the latest account-card display changes supplied for the related-accounts shortcode.

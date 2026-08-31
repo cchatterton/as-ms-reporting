@@ -1,4 +1,4 @@
 {
-  "version": "1.3.4",
-  "body": "Adopted the latest account-card display changes and added an AlphaSys-only portfolio totals card with financial, delivery-month, and guidance aggregates."
+  "version": "1.3.5",
+  "body": "Simplified the portfolio totals card and added AlphaSys-only green heatmaps for customer counts by months delivered and pace guidance."
 }
