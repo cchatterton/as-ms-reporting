@@ -2,6 +2,13 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.3 - 2026-09-09
+
+- Added presentation-only section wrappers with consistent white gutters around each detail-report table.
+- Kept section titles inside their associated panels and Plan vs Actual connected to its chart.
+- Added a scoped position reset so theme styles cannot move the account edit control away from the title bar's top-right corner.
+- Preserved the existing table label width and chart offset so all twelve month columns remain aligned.
+
 ## 1.4.2 - 2026-09-09
 
 - Added a higher-specificity, component-scoped heading reset so theme styles cannot create a blank row above account-card title bars.

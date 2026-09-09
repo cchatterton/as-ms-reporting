@@ -1,4 +1,4 @@
 {
-  "version": "1.4.2",
-  "body": "Fixes theme heading styles creating a blank row above home-page card title bars and keeps the edit control correctly aligned within the navy header."
+  "version": "1.4.3",
+  "body": "Adds consistent white panel gutters around detail-report tables, keeps section titles inside their panels, and connects Plan vs Actual with its aligned chart."
 }

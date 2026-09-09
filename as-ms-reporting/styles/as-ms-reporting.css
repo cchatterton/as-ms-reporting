@@ -162,11 +162,13 @@ body:has(.ms-related-accounts) {
     line-height: 1.35;
 }
 
-.ms-account-edit {
-    position: absolute;
+.ms-related-accounts article.ms-account-card > .ms-account-edit {
+    position: absolute !important;
     z-index: 1;
-    top: 0.875rem;
-    right: 0.875rem;
+    top: 0.875rem !important;
+    right: 0.875rem !important;
+    bottom: auto !important;
+    left: auto !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -179,20 +181,20 @@ body:has(.ms-related-accounts) {
     transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
 }
 
-.ms-account-edit:hover,
-.ms-account-edit:focus {
+.ms-related-accounts article.ms-account-card > .ms-account-edit:hover,
+.ms-related-accounts article.ms-account-card > .ms-account-edit:focus {
     color: #fff;
     background: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-0.0625rem);
 }
 
-.ms-account-edit:focus-visible {
+.ms-related-accounts article.ms-account-card > .ms-account-edit:focus-visible {
     outline: 0.125rem solid var(--ms-teal-500);
     outline-offset: 0.125rem;
 }
 
-.ms-account-edit svg {
+.ms-related-accounts article.ms-account-card > .ms-account-edit svg {
     width: 1rem;
     height: 1rem;
     fill: currentColor;
@@ -373,9 +375,20 @@ body:has(.ms-related-accounts) {
     line-height: 1.25;
 }
 
-.ms-report > .ms-section-title:first-of-type + .ms-table {
+.ms-report-section {
+    box-sizing: border-box;
+    margin: 2rem 0;
+    padding: 1rem;
+    overflow: hidden;
+    background: var(--ms-panel);
+    border: 0.0625rem solid var(--ms-line);
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(6, 26, 51, 0.07);
+}
+
+.ms-report-section .ms-table {
     margin-bottom: 0;
-    box-shadow: 0 0.375rem 1.25rem rgba(6, 26, 51, 0.055);
+    box-shadow: none;
 }
 
 .ms-table th,
@@ -412,14 +425,9 @@ body:has(.ms-related-accounts) {
 }
 
 .ms-section-title {
-    margin: 2rem 0 0;
-    padding: 1rem 1.25rem 0.75rem;
+    margin: 0 0 0.75rem;
+    padding: 0;
     color: var(--ms-navy-900);
-    background: var(--ms-panel);
-    border: 0.0625rem solid var(--ms-line);
-    border-bottom: 0;
-    border-radius: 0.75rem 0.75rem 0 0;
-    box-shadow: 0 0.375rem 1.25rem rgba(6, 26, 51, 0.055);
     font-family: inherit;
     font-size: 1.25rem;
     font-weight: 700;
@@ -449,7 +457,6 @@ body:has(.ms-related-accounts) {
  * the 13.75rem label column plus its existing padding and border allowance.
  */
 .ms-chart-wrap {
-    position: relative;
     width: calc(100% - 14.375rem);
     margin-left: 14.375rem;
     height: 16.25rem;
@@ -460,16 +467,8 @@ body:has(.ms-related-accounts) {
     border-bottom: 0.0625rem solid var(--ms-line);
 }
 
-.ms-chart-wrap::before {
-    content: "";
-    position: absolute;
-    top: -0.0625rem;
-    bottom: -0.0625rem;
-    left: -14.375rem;
-    width: 14.375rem;
-    background: var(--ms-panel);
-    border-top: 0.0625rem solid var(--ms-line);
-    border-bottom: 0.0625rem solid var(--ms-line);
+.ms-plan-section .ms-chart-wrap {
+    margin-bottom: 0;
 }
 
 #msChart {

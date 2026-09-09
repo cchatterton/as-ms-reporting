@@ -361,6 +361,8 @@ if ($remaining_balance < 0) {
 <!-- PLAN VS ACTUAL -->
 <!-- ========================== -->
 
+<section class="ms-report-section ms-plan-section">
+
 <h2 class="ms-section-title">Plan vs Actual</h2>
 
 <table class="ms-table">
@@ -588,11 +590,15 @@ wp_localize_script(
 
 ?>
 
+</section>
+
 
 
 <!-- ========================== -->
 <!-- ROLE -->
 <!-- ========================== -->
+
+<section class="ms-report-section">
 
 <h2 class="ms-section-title">Service Breakdown — By Role</h2>
 
@@ -646,10 +652,14 @@ foreach ($role_order as $role) {
 
 </table>
 
+</section>
+
 
 <!-- ========================== -->
 <!-- CATEGORY -->
 <!-- ========================== -->
+
+<section class="ms-report-section">
 
 <h2 class="ms-section-title">Service Breakdown — By Category</h2>
 
@@ -742,6 +752,8 @@ foreach ($category_order as $type) {
 <?php endforeach; ?>
 
 </table>
+
+</section>
 
 </div>
 
