@@ -1,4 +1,4 @@
 {
-  "version": "1.4.0",
-  "body": "Introduces the approved premium navy-and-teal styling for account cards and detail reports while preserving access rules, month grouping, calculations, and exact 12-month table/chart alignment."
+  "version": "1.4.1",
+  "body": "Refines the premium styling with flush card title bars, stronger Pace Guidance contrast and conditional states, a connected Plan vs Actual table/chart surface, polished green heatmaps, and the intended cool page background."
 }

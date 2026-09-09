@@ -11,7 +11,21 @@
 
     document.querySelectorAll('[data-asms-heat-alpha]').forEach(function (element) {
         const alpha = Math.max(0, Math.min(1, Number(element.getAttribute('data-asms-heat-alpha')) || 0));
-        element.style.background = 'rgba(22, 151, 141, ' + (alpha * 0.82) + ')';
+        element.style.background = 'rgba(43, 160, 86, ' + (alpha * 0.88) + ')';
+    });
+
+    document.querySelectorAll('.ms-guidance-result').forEach(function (element) {
+        const state = element.textContent.trim().toLowerCase();
+
+        if (state === 'increase pace') {
+            element.classList.add('ms-guidance-increase');
+        } else if (state === 'decrease pace') {
+            element.classList.add('ms-guidance-decrease');
+        } else if (state === 'stay the course') {
+            element.classList.add('ms-guidance-stay');
+        } else if (state === 'closed') {
+            element.classList.add('ms-guidance-closed');
+        }
     });
 
     const canvas = document.getElementById('msChart');

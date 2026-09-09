@@ -2,6 +2,13 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.1 - 2026-09-09
+
+- Removed the theme-sensitive negative-margin card header so title bars render flush with the card edge.
+- Increased Pace Guidance table contrast and added conditional Increase, Stay, Decrease, and Closed presentation states on detail pages.
+- Placed report section headings inside their white panel surfaces and gave the Plan vs Actual table and chart one continuous background without changing their twelve-month geometry.
+- Shifted service heatmaps to the approved mint-to-green palette and applied the intended cool report-page background.
+
 ## 1.4.0 - 2026-09-09
 
 - Added the approved navy-and-teal premium visual system to account cards and account detail reports.

@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,14 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.1 =
+
+* Removed the unwanted space above account-card title bars.
+* Added conditional guidance styling and stronger Pace Guidance contrast.
+* Visually connected Plan vs Actual with its chart while preserving 12-month alignment.
+* Placed report section headings inside their white panel surfaces.
+* Restored a polished green heatmap palette and applied the intended cool page background.
 
 = 1.4.0 =
 
