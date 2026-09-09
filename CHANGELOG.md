@@ -2,6 +2,11 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.2 - 2026-09-09
+
+- Added a higher-specificity, component-scoped heading reset so theme styles cannot create a blank row above account-card title bars.
+- Restored the edit control to its intended position within the flush navy header.
+
 ## 1.4.1 - 2026-09-09
 
 - Removed the theme-sensitive negative-margin card header so title bars render flush with the card edge.

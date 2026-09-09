@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,11 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.2 =
+
+* Prevented theme heading margins from creating space above home-page card title bars.
+* Kept the edit control aligned inside the flush navy title bar.
 
 = 1.4.1 =
 

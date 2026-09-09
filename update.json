@@ -1,4 +1,4 @@
 {
-  "version": "1.4.1",
-  "body": "Refines the premium styling with flush card title bars, stronger Pace Guidance contrast and conditional states, a connected Plan vs Actual table/chart surface, polished green heatmaps, and the intended cool page background."
+  "version": "1.4.2",
+  "body": "Fixes theme heading styles creating a blank row above home-page card title bars and keeps the edit control correctly aligned within the navy header."
 }

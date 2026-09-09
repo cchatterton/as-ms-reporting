@@ -144,11 +144,12 @@ body:has(.ms-related-accounts) {
     position: relative;
 }
 
-.ms-account-card h2 {
+.ms-related-accounts article.ms-summary-card.ms-account-card > h2 {
     display: flex;
     align-items: center;
     min-height: 3.75rem;
-    margin: 0 0 1rem !important;
+    margin-block: 0 1rem !important;
+    margin-inline: 0 !important;
     padding: 0.875rem 3.25rem 0.875rem 1.125rem;
     color: #fff;
     background:
@@ -197,13 +198,13 @@ body:has(.ms-related-accounts) {
     fill: currentColor;
 }
 
-.ms-account-card h2 a {
+.ms-related-accounts .ms-account-card h2 a {
     color: inherit;
     text-decoration: none;
 }
 
-.ms-account-card h2 a:hover,
-.ms-account-card h2 a:focus {
+.ms-related-accounts .ms-account-card h2 a:hover,
+.ms-related-accounts .ms-account-card h2 a:focus {
     text-decoration: underline;
     text-decoration-color: var(--ms-teal-500);
     text-underline-offset: 0.2em;

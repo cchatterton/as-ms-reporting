@@ -1,7 +1,7 @@
 # AS Managed Services Reporting
 
 Author: AlphaSys  
-Version: 1.4.1
+Version: 1.4.2
 Status: Production
 
 ## Purpose
