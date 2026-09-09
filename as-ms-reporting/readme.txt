@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,13 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.4 =
+
+* Removed the minimum height from account-card title bars.
+* Truncated long account titles to a single-line ellipsis.
+* Re-centred the edit control within the compact title bar.
+* Placed related-user content directly below the metrics in a consistent, subtle footer.
 
 = 1.4.3 =
 

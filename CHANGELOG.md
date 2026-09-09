@@ -2,6 +2,13 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.4 - 2026-09-09
+
+- Removed the account-card title bar minimum height.
+- Added single-line ellipsis overflow for long account titles.
+- Repositioned the edit control to remain vertically centred in the compact title bar.
+- Made related-user content a consistent, subtly divided footer directly below the account metrics.
+
 ## 1.4.3 - 2026-09-09
 
 - Added presentation-only section wrappers with consistent white gutters around each detail-report table.

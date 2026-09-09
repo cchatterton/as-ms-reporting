@@ -147,7 +147,6 @@ body:has(.ms-related-accounts) {
 .ms-related-accounts article.ms-summary-card.ms-account-card > h2 {
     display: flex;
     align-items: center;
-    min-height: 3.75rem;
     margin-block: 0 1rem !important;
     margin-inline: 0 !important;
     padding: 0.875rem 3.25rem 0.875rem 1.125rem;
@@ -163,9 +162,10 @@ body:has(.ms-related-accounts) {
 }
 
 .ms-related-accounts article.ms-account-card > .ms-account-edit {
+    box-sizing: border-box;
     position: absolute !important;
     z-index: 1;
-    top: 0.875rem !important;
+    top: 0.5rem !important;
     right: 0.875rem !important;
     bottom: auto !important;
     left: auto !important;
@@ -201,8 +201,13 @@ body:has(.ms-related-accounts) {
 }
 
 .ms-related-accounts .ms-account-card h2 a {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
     color: inherit;
     text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .ms-related-accounts .ms-account-card h2 a:hover,
@@ -263,9 +268,15 @@ body:has(.ms-related-accounts) {
 }
 
 .ms-account-users {
-    margin-top: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 3.25rem;
+    margin-top: 0;
     padding: 0.875rem 1.125rem 1rem;
     color: var(--ms-ink);
+    border-top: 0.0625rem solid var(--ms-line);
     font-size: 0.8125rem;
     line-height: 1.4;
     opacity: 0.56;

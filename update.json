@@ -1,4 +1,4 @@
 {
-  "version": "1.4.3",
-  "body": "Adds consistent white panel gutters around detail-report tables, keeps section titles inside their panels, and connects Plan vs Actual with its aligned chart."
+  "version": "1.4.4",
+  "body": "Removes the account-card title minimum height, truncates long titles with an ellipsis, and re-centres the edit control in the compact title bar."
 }

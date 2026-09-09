@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PLUGIN_SLUG="as-ms-reporting"
-EXPECTED_VERSION="1.4.3"
+EXPECTED_VERSION="1.4.4"
 REPOSITORY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGIN_DIR="$REPOSITORY_DIR/$PLUGIN_SLUG"
 MAIN_FILE="$PLUGIN_DIR/$PLUGIN_SLUG.php"
@@ -12,11 +12,19 @@ grep -q "^ \* Version: $EXPECTED_VERSION$" "$MAIN_FILE"
 grep -q '^ \* Requires at least: 7.0$' "$MAIN_FILE"
 grep -q "define( 'ASMS_VERSION', '$EXPECTED_VERSION' );" "$MAIN_FILE"
 grep -q "^Stable tag: $EXPECTED_VERSION$" "$PLUGIN_DIR/readme.txt"
-grep -q '"version": "1.4.3"' "$REPOSITORY_DIR/update.json"
+grep -q '"version": "1.4.4"' "$REPOSITORY_DIR/update.json"
 grep -q 'margin-block: 0 1rem !important;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'padding: 1rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'right: 0.875rem !important;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'left: auto !important;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
+grep -q 'text-overflow: ellipsis;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
+grep -q 'min-height: 3.25rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
+grep -q 'margin-top: 0;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
+
+if grep -A5 'article.ms-summary-card.ms-account-card > h2' "$PLUGIN_DIR/styles/as-ms-reporting.css" | grep -q 'min-height'; then
+    echo "The account-card title still has a minimum height." >&2
+    exit 1
+fi
 grep -q '^ \* Update URI: https://github.com/cchatterton/as-ms-reporting$' "$MAIN_FILE"
 grep -q 'width: 13.75rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'width: calc(100% - 14.375rem);' "$PLUGIN_DIR/styles/as-ms-reporting.css"
