@@ -1,4 +1,4 @@
 {
-  "version": "1.3.9",
-  "body": "Uses the native WordPress 7 AI Client exclusively for category classification and monthly summaries. The direct OpenAI API-key fallback has been removed."
+  "version": "1.4.0",
+  "body": "Introduces the approved premium navy-and-teal styling for account cards and detail reports while preserving access rules, month grouping, calculations, and exact 12-month table/chart alignment."
 }

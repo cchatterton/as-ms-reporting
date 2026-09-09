@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.3.9
+Stable tag: 1.4.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,12 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.0 =
+
+* Introduced a cohesive premium visual system for account cards and detail reports.
+* Preserved account access, report-month grouping, calculations, and 12-month table/chart alignment.
+* Refined typography, title bars, panels, guidance states, user lists, heatmaps, and chart colours.
 
 = 1.3.9 =
 

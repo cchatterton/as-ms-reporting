@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PLUGIN_SLUG="as-ms-reporting"
-EXPECTED_VERSION="1.3.9"
+EXPECTED_VERSION="1.4.0"
 REPOSITORY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGIN_DIR="$REPOSITORY_DIR/$PLUGIN_SLUG"
 MAIN_FILE="$PLUGIN_DIR/$PLUGIN_SLUG.php"
@@ -12,8 +12,11 @@ grep -q "^ \* Version: $EXPECTED_VERSION$" "$MAIN_FILE"
 grep -q '^ \* Requires at least: 7.0$' "$MAIN_FILE"
 grep -q "define( 'ASMS_VERSION', '$EXPECTED_VERSION' );" "$MAIN_FILE"
 grep -q "^Stable tag: $EXPECTED_VERSION$" "$PLUGIN_DIR/readme.txt"
-grep -q '"version": "1.3.9"' "$REPOSITORY_DIR/update.json"
+grep -q '"version": "1.4.0"' "$REPOSITORY_DIR/update.json"
 grep -q '^ \* Update URI: https://github.com/cchatterton/as-ms-reporting$' "$MAIN_FILE"
+grep -q 'width: 13.75rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
+grep -q 'width: calc(100% - 14.375rem);' "$PLUGIN_DIR/styles/as-ms-reporting.css"
+grep -q 'margin-left: 14.375rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 
 if grep -q '^ \* Plugin URI:' "$MAIN_FILE"; then
     echo "Plugin URI must not be declared." >&2

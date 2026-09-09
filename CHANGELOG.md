@@ -2,6 +2,13 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.0 - 2026-09-09
+
+- Added the approved navy-and-teal premium visual system to account cards and account detail reports.
+- Standardised typography, aligned metric rows, refined panel surfaces, and made related-user lists visually subordinate.
+- Restyled guidance states, service heatmaps, and Plan vs Actual chart colours without changing their data or calculations.
+- Preserved access-dependent content, report-month grouping, equal-height card grids, and exact 12-month table/chart column geometry.
+
 ## 1.3.9 - 2026-08-31
 
 - Required WordPress 7.0 and routed all AI operations exclusively through its native AI Client.

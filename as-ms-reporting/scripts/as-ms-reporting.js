@@ -11,7 +11,7 @@
 
     document.querySelectorAll('[data-asms-heat-alpha]').forEach(function (element) {
         const alpha = Math.max(0, Math.min(1, Number(element.getAttribute('data-asms-heat-alpha')) || 0));
-        element.style.background = 'rgba(0, 128, 0, ' + alpha + ')';
+        element.style.background = 'rgba(22, 151, 141, ' + (alpha * 0.82) + ')';
     });
 
     const canvas = document.getElementById('msChart');
@@ -29,7 +29,7 @@
             datasets: [
                 {
                     data: report.base,
-                    backgroundColor: '#777',
+                    backgroundColor: '#123b63',
                     borderWidth: 0,
                     barPercentage: 1,
                     categoryPercentage: 0.92,
@@ -37,7 +37,7 @@
                 },
                 {
                     data: report.over,
-                    backgroundColor: '#e46b6b',
+                    backgroundColor: '#df6b70',
                     borderWidth: 0,
                     barPercentage: 1,
                     categoryPercentage: 0.92,
@@ -65,7 +65,7 @@
                 y: {
                     stacked: true,
                     beginAtZero: true,
-                    grid: { color: '#e0e0e0' },
+                    grid: { color: '#e2e9ef' },
                     ticks: { display: false },
                     border: { display: false }
                 }
