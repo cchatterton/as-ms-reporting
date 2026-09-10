@@ -1,4 +1,4 @@
 {
-  "version": "1.4.6",
-  "body": "Refines account-card mini charts with reliable bottom-aligned SVG bars, improved height, twelve fixed month positions, and table-aligned guide-line gutters."
+  "version": "1.4.7",
+  "body": "Tightens the account-card mini chart and related-user footer, removing the unwanted full-width divider and excess vertical whitespace."
 }

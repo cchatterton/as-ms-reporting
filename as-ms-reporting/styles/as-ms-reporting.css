@@ -269,11 +269,11 @@ body:has(.ms-related-accounts) {
 
 .ms-account-mini-chart {
     box-sizing: border-box;
-    flex: 0 0 4.25rem;
+    flex: 0 0 3.75rem;
     width: calc(100% - 2rem);
-    height: 4.25rem;
+    height: 3.75rem;
     margin: 0 1rem;
-    padding: 0.45rem 0 0.55rem;
+    padding: 0.35rem 0 0.2rem;
     background: #fff;
     border-top: 0.0625rem solid var(--ms-line);
 }
@@ -313,11 +313,11 @@ body:has(.ms-related-accounts) {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 3.25rem;
+    min-height: 2.5rem;
     margin-top: 0;
-    padding: 0.875rem 1.125rem 1rem;
+    padding: 0.45rem 1.125rem 0.65rem;
     color: var(--ms-ink);
-    border-top: 0.0625rem solid var(--ms-line);
+    border-top: 0;
     font-size: 0.8125rem;
     line-height: 1.4;
     opacity: 0.56;

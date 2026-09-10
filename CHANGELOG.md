@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.7 - 2026-09-10
+
+- Removed the full-card divider beneath account mini charts.
+- Reduced excess chart padding and tightened the related-user footer.
+- Preserved automatic footer growth for cards with multiple related users.
+
 ## 1.4.6 - 2026-09-10
 
 - Rebuilt card mini charts as baseline-aligned inline SVGs for reliable rendering across themes.
