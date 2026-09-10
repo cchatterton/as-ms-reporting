@@ -1,4 +1,4 @@
 {
-  "version": "1.4.4",
-  "body": "Removes the account-card title minimum height, truncates long titles with an ellipsis, and re-centres the edit control in the compact title bar."
+  "version": "1.4.5",
+  "body": "Adds a compact fixed twelve-month Plan vs Actual chart to every account card and removes the redundant Months Delivered card row."
 }

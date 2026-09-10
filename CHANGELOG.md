@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.5 - 2026-09-10
+
+- Added a compact twelve-month Plan vs Actual chart above the related-user footer on every account card.
+- Kept all twelve month positions visible, including empty and future months.
+- Removed the redundant Months Delivered row from account cards while retaining it on individual account reports.
+
 ## 1.4.4 - 2026-09-09
 
 - Removed the account-card title bar minimum height.

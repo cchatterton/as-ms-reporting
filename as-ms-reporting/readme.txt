@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,12 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.5 =
+
+* Added a compact twelve-month Plan vs Actual chart above the related-user footer on every account card.
+* Kept all twelve month positions visible, including empty and future months.
+* Removed the redundant Months Delivered row from account cards while retaining it on individual account reports.
 
 = 1.4.4 =
 

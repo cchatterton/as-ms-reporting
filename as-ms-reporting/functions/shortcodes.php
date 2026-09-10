@@ -369,11 +369,14 @@ function asms_get_account_card_data($account_id) {
     $actual_to_date = 0;
     $months_delivered = 0;
     $total_variations = 0;
+    $monthly_actuals = [];
 
     foreach ($months as $month) {
         $actual = '' !== $month['override'] && null !== $month['override']
             ? (float) str_replace(',', '', (string) $month['override'])
             : $month['actual'];
+
+        $monthly_actuals[] = $actual;
 
         if ($actual > 0) {
             $actual_to_date += $actual;
@@ -411,6 +414,8 @@ function asms_get_account_card_data($account_id) {
         'suggested_pace'         => $suggested_pace,
         'current_rolling_average' => $current_rolling_average,
         'guidance'               => $guidance,
+        'monthly_plan'           => $plan,
+        'monthly_actuals'        => $monthly_actuals,
         'related_users'          => asms_get_external_related_users($account_id),
     ];
 }
@@ -458,6 +463,54 @@ function asms_card_money($value) {
 }
 
 /**
+ * Render the compact twelve-month delivery chart shown on an account card.
+ *
+ * @param array<string, mixed> $data Calculated card data.
+ * @return string
+ */
+function asms_render_account_mini_chart($data) {
+    $actuals = isset($data['monthly_actuals']) && is_array($data['monthly_actuals'])
+        ? array_values(array_map('floatval', $data['monthly_actuals']))
+        : [];
+    $actuals = array_slice(array_pad($actuals, 12, 0), 0, 12);
+    $plan = max(0, (float) ($data['monthly_plan'] ?? 0));
+    $maximum = max(array_merge([$plan, 1], $actuals));
+    $accessible_values = [];
+
+    $output = '<div class="ms-account-mini-chart" role="img" aria-label="';
+
+    foreach ($actuals as $index => $actual) {
+        $accessible_values[] = sprintf(
+            'Month %d %s',
+            $index + 1,
+            asms_card_money($actual)
+        );
+    }
+
+    $output .= esc_attr('Monthly actuals: ' . implode(', ', $accessible_values)) . '">';
+
+    foreach ($actuals as $actual) {
+        $actual = max(0, $actual);
+        $base = min($actual, $plan);
+        $over = max($actual - $plan, 0);
+        $base_height = number_format(($base / $maximum) * 100, 3, '.', '');
+        $over_height = number_format(($over / $maximum) * 100, 3, '.', '');
+        $empty_class = $actual > 0 ? '' : ' is-empty';
+
+        $output .= '<span class="ms-account-mini-chart-month' . esc_attr($empty_class)
+            . '" style="--ms-mini-base:' . esc_attr($base_height)
+            . '%;--ms-mini-over:' . esc_attr($over_height) . '%">';
+        $output .= '<span class="ms-account-mini-chart-base" aria-hidden="true"></span>';
+        $output .= '<span class="ms-account-mini-chart-over" aria-hidden="true"></span>';
+        $output .= '</span>';
+    }
+
+    $output .= '</div>';
+
+    return $output;
+}
+
+/**
  * Render a single account pace card.
  *
  * @param WP_Post              $account Account post.
@@ -469,7 +522,6 @@ function asms_render_account_card($account, $data) {
         'Current TCV'             => asms_card_money($data['current_tcv']),
         'Actual to Date'          => asms_card_money($data['actual_to_date']),
         'Remaining Balance'       => asms_card_money($data['remaining_balance']),
-        'Months Delivered'        => absint($data['months_delivered']) . ' of 12',
         'Suggested Monthly Pace'  => asms_card_money($data['suggested_pace']),
         'Current Rolling Average' => asms_card_money($data['current_rolling_average']),
         'Guidance'                => $data['guidance'],
@@ -521,6 +573,7 @@ function asms_render_account_card($account, $data) {
     }
 
     $output .= '</tbody></table>';
+    $output .= asms_render_account_mini_chart($data);
     $output .= '<div class="ms-account-users">';
 
     if ($data['related_users']) {
