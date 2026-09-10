@@ -269,60 +269,43 @@ body:has(.ms-related-accounts) {
 
 .ms-account-mini-chart {
     box-sizing: border-box;
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    align-items: end;
-    flex: 0 0 3rem;
-    gap: 0.2rem;
-    width: 100%;
-    height: 3rem;
-    margin-top: 0;
-    padding: 0.35rem 1rem 0.45rem;
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            transparent 0,
-            transparent calc(50% - 0.03125rem),
-            rgba(18, 59, 99, 0.08) 50%,
-            transparent calc(50% + 0.03125rem),
-            transparent 100%
-        ),
-        #fff;
+    flex: 0 0 4.25rem;
+    width: calc(100% - 2rem);
+    height: 4.25rem;
+    margin: 0 1rem;
+    padding: 0.45rem 0 0.55rem;
+    background: #fff;
     border-top: 0.0625rem solid var(--ms-line);
 }
 
-.ms-account-mini-chart-month {
-    position: relative;
+.ms-account-mini-chart svg {
     display: block;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    background: rgba(18, 59, 99, 0.035);
-    border-bottom: 0.0625rem solid rgba(18, 59, 99, 0.2);
+    overflow: visible;
+    shape-rendering: crispEdges;
 }
 
-.ms-account-mini-chart-base,
-.ms-account-mini-chart-over {
-    position: absolute;
-    right: 0;
-    left: 0;
-    display: block;
+.ms-account-mini-chart-grid {
+    stroke: rgba(18, 59, 99, 0.09);
+    stroke-width: 1;
+}
+
+.ms-account-mini-chart-baseline {
+    stroke: rgba(18, 59, 99, 0.22);
+    stroke-width: 1;
+}
+
+.ms-account-mini-chart-empty {
+    fill: rgba(18, 59, 99, 0.12);
 }
 
 .ms-account-mini-chart-base {
-    bottom: 0;
-    height: var(--ms-mini-base);
-    background: var(--ms-navy-800);
+    fill: var(--ms-navy-800);
 }
 
 .ms-account-mini-chart-over {
-    bottom: var(--ms-mini-base);
-    height: var(--ms-mini-over);
-    background: #df6b70;
-}
-
-.ms-account-mini-chart-month.is-empty {
-    background: rgba(18, 59, 99, 0.018);
+    fill: #df6b70;
 }
 
 .ms-account-users {

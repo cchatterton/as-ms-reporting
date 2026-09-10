@@ -2,6 +2,13 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.6 - 2026-09-10
+
+- Rebuilt card mini charts as baseline-aligned inline SVGs for reliable rendering across themes.
+- Increased the mini-chart height to approximately one and a half metric rows.
+- Replaced boxed month cells with subtle gridlines and twelve understated baseline markers.
+- Inset the complete chart and its guide lines to the same gutters as the metric table.
+
 ## 1.4.5 - 2026-09-10
 
 - Added a compact twelve-month Plan vs Actual chart above the related-user footer on every account card.

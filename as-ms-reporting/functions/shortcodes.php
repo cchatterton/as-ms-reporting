@@ -476,6 +476,8 @@ function asms_render_account_mini_chart($data) {
     $plan = max(0, (float) ($data['monthly_plan'] ?? 0));
     $maximum = max(array_merge([$plan, 1], $actuals));
     $accessible_values = [];
+    $plot_height = 92;
+    $baseline = 96;
 
     $output = '<div class="ms-account-mini-chart" role="img" aria-label="';
 
@@ -488,24 +490,38 @@ function asms_render_account_mini_chart($data) {
     }
 
     $output .= esc_attr('Monthly actuals: ' . implode(', ', $accessible_values)) . '">';
+    $output .= '<svg viewBox="0 0 1200 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">';
+    $output .= '<line class="ms-account-mini-chart-grid" x1="4" y1="32" x2="1196" y2="32" />';
+    $output .= '<line class="ms-account-mini-chart-grid" x1="4" y1="64" x2="1196" y2="64" />';
+    $output .= '<line class="ms-account-mini-chart-baseline" x1="4" y1="96" x2="1196" y2="96" />';
 
-    foreach ($actuals as $actual) {
+    foreach ($actuals as $index => $actual) {
         $actual = max(0, $actual);
         $base = min($actual, $plan);
         $over = max($actual - $plan, 0);
-        $base_height = number_format(($base / $maximum) * 100, 3, '.', '');
-        $over_height = number_format(($over / $maximum) * 100, 3, '.', '');
-        $empty_class = $actual > 0 ? '' : ' is-empty';
+        $base_height = ($base / $maximum) * $plot_height;
+        $over_height = ($over / $maximum) * $plot_height;
+        $x = ($index * 100) + 4;
+        $base_y = $baseline - $base_height;
+        $over_y = $base_y - $over_height;
 
-        $output .= '<span class="ms-account-mini-chart-month' . esc_attr($empty_class)
-            . '" style="--ms-mini-base:' . esc_attr($base_height)
-            . '%;--ms-mini-over:' . esc_attr($over_height) . '%">';
-        $output .= '<span class="ms-account-mini-chart-base" aria-hidden="true"></span>';
-        $output .= '<span class="ms-account-mini-chart-over" aria-hidden="true"></span>';
-        $output .= '</span>';
+        $output .= '<rect class="ms-account-mini-chart-empty" x="' . esc_attr($x)
+            . '" y="94" width="92" height="2" />';
+
+        if ($base_height > 0) {
+            $output .= '<rect class="ms-account-mini-chart-base" x="' . esc_attr($x)
+                . '" y="' . esc_attr(number_format($base_y, 3, '.', ''))
+                . '" width="92" height="' . esc_attr(number_format($base_height, 3, '.', '')) . '" />';
+        }
+
+        if ($over_height > 0) {
+            $output .= '<rect class="ms-account-mini-chart-over" x="' . esc_attr($x)
+                . '" y="' . esc_attr(number_format($over_y, 3, '.', ''))
+                . '" width="92" height="' . esc_attr(number_format($over_height, 3, '.', '')) . '" />';
+        }
     }
 
-    $output .= '</div>';
+    $output .= '</svg></div>';
 
     return $output;
 }

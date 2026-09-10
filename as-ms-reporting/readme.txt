@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.5
+Stable tag: 1.4.6
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,13 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.6 =
+
+* Rebuilt card mini charts as baseline-aligned inline SVGs for reliable rendering across themes.
+* Increased the mini-chart height to approximately one and a half metric rows.
+* Replaced boxed month cells with subtle gridlines and twelve understated baseline markers.
+* Inset chart guide lines to the same gutters as the metric table.
 
 = 1.4.5 =
 

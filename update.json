@@ -1,4 +1,4 @@
 {
-  "version": "1.4.5",
-  "body": "Adds a compact fixed twelve-month Plan vs Actual chart to every account card and removes the redundant Months Delivered card row."
+  "version": "1.4.6",
+  "body": "Refines account-card mini charts with reliable bottom-aligned SVG bars, improved height, twelve fixed month positions, and table-aligned guide-line gutters."
 }
