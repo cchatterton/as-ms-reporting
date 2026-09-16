@@ -1,7 +1,7 @@
 # AS Managed Services Reporting
 
 Author: AlphaSys  
-Version: 1.4.7<br>
+Version: 1.4.8<br>
 Status: Production
 
 AS Managed Services Reporting provides managed-services account reporting, related-user access controls, tab-separated data imports, and optional AI-assisted classification and summaries.
@@ -10,7 +10,7 @@ AS Managed Services Reporting provides managed-services account reporting, relat
 
 Upload `as-ms-reporting.zip` through **Plugins > Add New > Upload Plugin**, then activate it.
 
-This plugin requires WordPress 7.0 or later. Configure an AI provider under **Settings > Connectors**. The plugin uses the native WordPress AI Client and the credentials held by that connector; it does not accept or store an API key itself.
+This plugin requires WordPress 7.0 or later. Configure an AI provider under **Settings > Connectors**. When the rAIven Connector is active with a key and selected model, this plugin uses rAIven first. If rAIven is unavailable, unconfigured, fails generation, or returns invalid classification JSON, it retries through the native OpenAI connector. The plugin does not accept or store either provider's API key itself.
 
 The model can be overridden in `wp-config.php` before WordPress loads the plugin:
 

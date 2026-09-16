@@ -1,0 +1,183 @@
+<?php
+
+define('ABSPATH', __DIR__);
+define('ASMS_OPENAI_MODEL', 'openai-test-model');
+
+class WP_Error {
+    private $message;
+
+    public function __construct($code, $message) {
+        $this->message = $message;
+    }
+
+    public function get_error_message() {
+        return $this->message;
+    }
+}
+
+function is_wp_error($value) {
+    return $value instanceof WP_Error;
+}
+
+function wp_json_encode($value) {
+    return json_encode($value);
+}
+
+$asms_test_raiven_key = 'configured-key';
+$asms_test_raiven_model = 'raiven-test-model';
+$asms_test_raiven_models = ['raiven-test-model'];
+$asms_test_results = [];
+$asms_test_attempts = [];
+
+function as329_rai_get_settings() {
+    global $asms_test_raiven_model;
+
+    return ['model' => $asms_test_raiven_model];
+}
+
+function as329_rai_get_api_key() {
+    global $asms_test_raiven_key;
+
+    return $asms_test_raiven_key;
+}
+
+function as329_rai_get_model_ids() {
+    global $asms_test_raiven_models;
+
+    return $asms_test_raiven_models;
+}
+
+class ASMS_Test_AI_Builder {
+    private $instructions = '';
+    private $provider = '';
+    private $model_preference = [];
+    private $structured = false;
+
+    public function using_system_instruction($instructions) {
+        $this->instructions = $instructions;
+
+        return $this;
+    }
+
+    public function using_model_preference($model_preference) {
+        $this->model_preference = $model_preference;
+
+        return $this;
+    }
+
+    public function using_provider($provider) {
+        $this->provider = $provider;
+
+        return $this;
+    }
+
+    public function as_json_response($schema) {
+        $this->structured = true;
+
+        return $this;
+    }
+
+    public function generate_text() {
+        global $asms_test_attempts, $asms_test_results;
+
+        $provider = $this->provider;
+        $asms_test_attempts[] = [
+            'provider'     => $provider,
+            'instructions' => $this->instructions,
+            'structured'   => $this->structured,
+        ];
+
+        return $asms_test_results[$provider] ?? new WP_Error('missing_result', 'No test result.');
+    }
+}
+
+function wp_ai_client_prompt($input) {
+    return new ASMS_Test_AI_Builder();
+}
+
+require dirname(__DIR__) . '/as-ms-reporting/functions/ms-data-pipeline.php';
+
+function asms_test_assert($condition, $message) {
+    if (!$condition) {
+        fwrite(STDERR, "FAIL: {$message}\n");
+        exit(1);
+    }
+}
+
+function asms_test_reset($results) {
+    global $asms_test_attempts, $asms_test_results;
+
+    $asms_test_attempts = [];
+    $asms_test_results = $results;
+}
+
+asms_test_reset([
+    'raiven' => 'rAIven summary',
+    'openai' => 'OpenAI summary',
+]);
+$result = asms_generate_ai_text('Input', 'Instructions');
+asms_test_assert('rAIven summary' === $result, 'Configured rAIven should be preferred.');
+asms_test_assert(['raiven'] === array_column($asms_test_attempts, 'provider'), 'OpenAI should not run after rAIven succeeds.');
+
+asms_test_reset([
+    'raiven' => new WP_Error('raiven_failed', 'rAIven failed.'),
+    'openai' => 'OpenAI fallback',
+]);
+$result = asms_generate_ai_text('Input', 'Instructions');
+asms_test_assert('OpenAI fallback' === $result, 'OpenAI should run when rAIven generation fails.');
+asms_test_assert(['raiven', 'openai'] === array_column($asms_test_attempts, 'provider'), 'Fallback order should be rAIven then OpenAI.');
+
+$schema = [
+    'type'                 => 'object',
+    'properties'           => [
+        'answer' => [
+            'type' => 'string',
+            'enum' => ['ok'],
+        ],
+    ],
+    'required'             => ['answer'],
+    'additionalProperties' => false,
+];
+
+asms_test_reset([
+    'raiven' => "```json\n{\"answer\":\"ok\"}\n```",
+    'openai' => '{"answer":"ok"}',
+]);
+$result = asms_generate_ai_text('Input', 'Instructions', $schema);
+asms_test_assert('{"answer":"ok"}' === $result, 'Valid fenced rAIven JSON should be normalized and accepted.');
+asms_test_assert(false === $asms_test_attempts[0]['structured'], 'rAIven must not receive unsupported native structured-output options.');
+asms_test_assert(false !== strpos($asms_test_attempts[0]['instructions'], 'Return only valid JSON'), 'rAIven should receive JSON-only instructions.');
+
+asms_test_reset([
+    'raiven' => '{"answer":"unsupported"}',
+    'openai' => '{"answer":"ok"}',
+]);
+$result = asms_generate_ai_text('Input', 'Instructions', $schema);
+asms_test_assert('{"answer":"ok"}' === $result, 'Invalid rAIven structured data should fall back to OpenAI.');
+asms_test_assert(true === $asms_test_attempts[1]['structured'], 'OpenAI should use native structured output.');
+
+$fixed_length_schema = [
+    'type'     => 'array',
+    'minItems' => 2,
+    'maxItems' => 2,
+    'items'    => ['type' => 'string'],
+];
+asms_test_assert(
+    !asms_ai_json_matches_schema('["one"]', $fixed_length_schema),
+    'Incomplete classification arrays should fail validation and permit fallback.'
+);
+asms_test_assert(
+    asms_ai_json_matches_schema('["one","two"]', $fixed_length_schema),
+    'Complete fixed-length classification arrays should pass validation.'
+);
+
+$asms_test_raiven_key = '';
+asms_test_reset([
+    'raiven' => 'Unexpected',
+    'openai' => 'OpenAI only',
+]);
+$result = asms_generate_ai_text('Input', 'Instructions');
+asms_test_assert('OpenAI only' === $result, 'Unconfigured rAIven should be skipped.');
+asms_test_assert(['openai'] === array_column($asms_test_attempts, 'provider'), 'Only OpenAI should run when rAIven is unconfigured.');
+
+echo "AI provider routing tests passed.\n";

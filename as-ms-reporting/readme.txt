@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.7
+Stable tag: 1.4.8
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,17 +20,30 @@ The plugin supports native WordPress updates from its public GitHub releases.
 
 1. Upload `as-ms-reporting.zip` through Plugins > Add New > Upload Plugin.
 2. Activate AS Managed Services Reporting.
-3. Configure an AI provider under Settings > Connectors. The plugin uses the native WordPress AI Client and does not accept or store an API key itself.
+3. Configure OpenAI under Settings > Connectors.
+4. Optionally install and configure rAIven Connector 0.2.0 or later, including a selected rAIven model. When ready, rAIven is tried first and OpenAI is the fallback.
 
 == External services ==
 
-This plugin sends managed-services task descriptions, staff roles, and monthly notes through the native WordPress AI Client when an authorised editor saves imported reporting data or notes. The configured WordPress connector selects the AI provider and manages its credentials. The plugin does not access or store the provider API key directly. This data is used to classify work and create report summaries.
+This plugin sends managed-services task descriptions, staff roles, and monthly notes through the native WordPress AI Client when an authorised editor saves imported reporting data or notes. A configured rAIven provider is attempted first. The same request may then be sent to OpenAI if rAIven is unavailable, fails, or returns invalid classification data. Each connector manages its own credentials; this plugin does not access or store either provider API key. This data is used to classify work and create report summaries.
+
+rAIven (AlphaSys): https://raiven.alphasys.com/
+
+rAIven privacy policy: https://alphasys.com.au/privacy-policy/
+
+rAIven service terms are supplied with the applicable AlphaSys account agreement.
 
 OpenAI API terms: https://openai.com/policies/service-terms/
 
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.8 =
+
+* Preferred a configured rAIven Connector and its selected model for AI classifications and summaries.
+* Retried through the native OpenAI connector when rAIven is unavailable, unconfigured, fails, or returns invalid structured output.
+* Added provider-aware JSON enforcement and validation for rAIven classification responses.
 
 = 1.4.7 =
 

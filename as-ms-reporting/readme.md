@@ -1,7 +1,7 @@
 # AS Managed Services Reporting
 
 Author: AlphaSys  
-Version: 1.4.7
+Version: 1.4.8
 Status: Production
 
 ## Purpose
@@ -10,7 +10,7 @@ Provides managed-services account reports, related-user access, data imports, an
 
 ## Configuration
 
-This plugin requires WordPress 7.0 or later. Configure an AI provider under **Settings > Connectors**. The plugin exclusively uses the native WordPress AI Client and the connector's securely stored credentials.
+This plugin requires WordPress 7.0 or later. Configure providers under **Settings > Connectors**. A configured rAIven Connector and its selected model are preferred. The native OpenAI connector is used when rAIven is unavailable, unconfigured, fails generation, or returns invalid classification JSON. Provider credentials remain managed by their connectors.
 
 ## Updates
 

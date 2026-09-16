@@ -132,7 +132,191 @@ function as_ms_parse_csv($raw, $post_id) {
 // ==========================
 
 /**
- * Generate text through the WordPress 7 AI Client.
+ * Return the configured rAIven model preference when the connector is ready.
+ *
+ * @return array<int, string>|null
+ */
+function asms_get_raiven_model_preference() {
+    if (
+        !function_exists('as329_rai_get_settings')
+        || !function_exists('as329_rai_get_api_key')
+        || !function_exists('as329_rai_get_model_ids')
+    ) {
+        return null;
+    }
+
+    try {
+        $settings = as329_rai_get_settings();
+        $model = is_array($settings) && is_string($settings['model'] ?? null)
+            ? trim($settings['model'])
+            : '';
+
+        if ('' === $model || '' === trim((string) as329_rai_get_api_key())) {
+            return null;
+        }
+
+        $available_models = as329_rai_get_model_ids();
+
+        if (!is_array($available_models) || !in_array($model, $available_models, true)) {
+            return null;
+        }
+
+        return ['raiven', $model];
+    } catch (Throwable $error) {
+        return null;
+    }
+}
+
+/**
+ * Return AI providers in the order requests should be attempted.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function asms_get_ai_provider_preferences() {
+    $preferences = [];
+    $raiven = asms_get_raiven_model_preference();
+
+    if ($raiven) {
+        $preferences[] = [
+            'name'                    => 'rAIven',
+            'provider_id'             => 'raiven',
+            'model_preference'        => $raiven,
+            'native_structured_output' => false,
+        ];
+    }
+
+    $openai_model = defined('ASMS_OPENAI_MODEL')
+        ? trim((string) ASMS_OPENAI_MODEL)
+        : '';
+
+    if ('' !== $openai_model) {
+        $preferences[] = [
+            'name'                    => 'OpenAI',
+            'provider_id'             => 'openai',
+            'model_preference'        => ['openai', $openai_model],
+            'native_structured_output' => true,
+        ];
+    }
+
+    return $preferences;
+}
+
+/**
+ * Remove an optional Markdown fence from a JSON-only AI response.
+ *
+ * @param string $text Generated text.
+ * @return string
+ */
+function asms_normalize_ai_json_text($text) {
+    $text = trim((string) $text);
+
+    if (preg_match('/^```(?:json)?\s*(.*?)\s*```$/is', $text, $matches)) {
+        return trim($matches[1]);
+    }
+
+    return $text;
+}
+
+/**
+ * Validate decoded JSON against the subset of JSON Schema used by this plugin.
+ *
+ * @param mixed $value  Decoded JSON value.
+ * @param array $schema JSON schema.
+ * @return bool
+ */
+function asms_ai_value_matches_schema($value, $schema) {
+    $type = $schema['type'] ?? null;
+
+    if ('object' === $type) {
+        if (!is_array($value) || array_is_list($value)) {
+            return false;
+        }
+
+        foreach (($schema['required'] ?? []) as $required_key) {
+            if (!array_key_exists($required_key, $value)) {
+                return false;
+            }
+        }
+
+        $properties = is_array($schema['properties'] ?? null) ? $schema['properties'] : [];
+
+        if (false === ($schema['additionalProperties'] ?? true)) {
+            foreach (array_keys($value) as $key) {
+                if (!array_key_exists($key, $properties)) {
+                    return false;
+                }
+            }
+        }
+
+        foreach ($properties as $key => $property_schema) {
+            if (array_key_exists($key, $value) && !asms_ai_value_matches_schema($value[$key], $property_schema)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    if ('array' === $type) {
+        if (!is_array($value) || !array_is_list($value)) {
+            return false;
+        }
+
+        $item_count = count($value);
+
+        if (isset($schema['minItems']) && $item_count < (int) $schema['minItems']) {
+            return false;
+        }
+
+        if (isset($schema['maxItems']) && $item_count > (int) $schema['maxItems']) {
+            return false;
+        }
+
+        foreach ($value as $item) {
+            if (!asms_ai_value_matches_schema($item, $schema['items'] ?? [])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    if ('string' === $type) {
+        return is_string($value)
+            && (!isset($schema['enum']) || in_array($value, $schema['enum'], true));
+    }
+
+    if ('integer' === $type) {
+        return is_int($value);
+    }
+
+    if ('number' === $type) {
+        return is_int($value) || is_float($value);
+    }
+
+    if ('boolean' === $type) {
+        return is_bool($value);
+    }
+
+    return true;
+}
+
+/**
+ * Validate a generated JSON response before accepting a provider result.
+ *
+ * @param string $text   Generated text.
+ * @param array  $schema JSON schema.
+ * @return bool
+ */
+function asms_ai_json_matches_schema($text, $schema) {
+    $decoded = json_decode($text, true);
+
+    return JSON_ERROR_NONE === json_last_error()
+        && asms_ai_value_matches_schema($decoded, $schema);
+}
+
+/**
+ * Generate text through rAIven when configured, then fall back to OpenAI.
  *
  * @param string     $input        User input.
  * @param string     $instructions System instructions.
@@ -147,27 +331,64 @@ function asms_generate_ai_text($input, $instructions, $schema = null) {
         );
     }
 
-    try {
-        $builder = wp_ai_client_prompt($input)
-            ->using_system_instruction($instructions);
+    $provider_preferences = asms_get_ai_provider_preferences();
 
-        if (defined('ASMS_OPENAI_MODEL') && ASMS_OPENAI_MODEL) {
-            $builder = $builder->using_model_preference(ASMS_OPENAI_MODEL);
-        }
-
-        if (is_array($schema)) {
-            $builder = $builder->as_json_response($schema);
-        }
-
-        $result = $builder->generate_text();
-    } catch (Throwable $error) {
+    if (!$provider_preferences) {
         return new WP_Error(
-            'asms_wordpress_ai_client_error',
-            $error->getMessage()
+            'asms_ai_provider_unavailable',
+            'Neither rAIven nor OpenAI is configured for this plugin.'
         );
     }
 
-    return is_wp_error($result) ? $result : trim((string) $result);
+    $errors = [];
+
+    foreach ($provider_preferences as $provider) {
+        try {
+            $provider_instructions = $instructions;
+
+            if (is_array($schema) && !$provider['native_structured_output']) {
+                $provider_instructions .= "\n\nReturn only valid JSON matching this schema. "
+                    . "Do not use Markdown or code fences.\n"
+                    . wp_json_encode($schema);
+            }
+
+            $builder = wp_ai_client_prompt($input)
+                ->using_system_instruction($provider_instructions)
+                ->using_provider($provider['provider_id'])
+                ->using_model_preference($provider['model_preference']);
+
+            if (is_array($schema) && $provider['native_structured_output']) {
+                $builder = $builder->as_json_response($schema);
+            }
+
+            $result = $builder->generate_text();
+
+            if (is_wp_error($result)) {
+                $errors[] = $provider['name'] . ': ' . $result->get_error_message();
+                continue;
+            }
+
+            $text = trim((string) $result);
+
+            if (is_array($schema)) {
+                $text = asms_normalize_ai_json_text($text);
+
+                if (!asms_ai_json_matches_schema($text, $schema)) {
+                    $errors[] = $provider['name'] . ': invalid structured response.';
+                    continue;
+                }
+            }
+
+            return $text;
+        } catch (Throwable $error) {
+            $errors[] = $provider['name'] . ': ' . $error->getMessage();
+        }
+    }
+
+    return new WP_Error(
+        'asms_wordpress_ai_client_error',
+        implode(' ', $errors)
+    );
 }
 
 
@@ -219,8 +440,10 @@ function as_ms_classify_data($rows) {
         'type'                 => 'object',
         'properties'           => [
             'classifications' => [
-                'type'  => 'array',
-                'items' => [
+                'type'     => 'array',
+                'minItems' => count($rows),
+                'maxItems' => count($rows),
+                'items'    => [
                     'type'                 => 'object',
                     'properties'           => [
                         'type' => [

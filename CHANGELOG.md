@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.8 - 2026-09-16
+
+- Preferred a configured rAIven Connector and its selected model for AI classifications and summaries.
+- Retried through the native OpenAI connector when rAIven is unavailable, unconfigured, fails, or returns invalid structured output.
+- Added provider-aware JSON enforcement and validation for rAIven classification responses.
+
 ## 1.4.7 - 2026-09-10
 
 - Removed the full-card divider beneath account mini charts.

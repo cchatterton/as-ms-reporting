@@ -1,4 +1,4 @@
 {
-  "version": "1.4.7",
-  "body": "Tightens the account-card mini chart and related-user footer, removing the unwanted full-width divider and excess vertical whitespace."
+  "version": "1.4.8",
+  "body": "Prefers a configured rAIven provider for classifications and summaries, with validated structured responses and automatic OpenAI fallback."
 }
