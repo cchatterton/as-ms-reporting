@@ -1,4 +1,4 @@
 {
-  "version": "1.4.11",
-  "body": "Stops forwarding stale legacy model settings such as gpt-4 and delegates model discovery and selection entirely to the native rAIven provider."
+  "version": "1.4.12",
+  "body": "Explicitly selects rAIven's verified qwen3.8-flash-next-nvfp4 model, avoiding the advertised gpt-4 entry that has no active endpoint."
 }

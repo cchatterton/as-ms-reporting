@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.12 - 2026-09-17
+
+- Explicitly selected rAIven's verified `qwen3.8-flash-next-nvfp4` model for native AI requests.
+- Avoided automatic selection of the advertised `gpt-4` model, which has no active rAIven endpoint.
+- Added the `ASMS_RAIVEN_MODEL` constant as an optional account-specific model override.
+
 ## 1.4.11 - 2026-09-17
 
 - Stopped forwarding stale legacy model settings such as `gpt-4` to rAIven.

@@ -145,6 +145,23 @@ function asms_is_raiven_connector_available() {
 }
 
 /**
+ * Return the rAIven model used for native WordPress AI requests.
+ *
+ * The connector requires native clients to select an account model explicitly.
+ * ASMS_RAIVEN_MODEL allows a future account-specific model change without a
+ * plugin release.
+ *
+ * @return string
+ */
+function asms_get_raiven_model_id() {
+    $model = defined('ASMS_RAIVEN_MODEL')
+        ? trim((string) ASMS_RAIVEN_MODEL)
+        : 'qwen3.8-flash-next-nvfp4';
+
+    return '' !== $model ? $model : 'qwen3.8-flash-next-nvfp4';
+}
+
+/**
  * Return AI providers in the order requests should be attempted.
  *
  * @return array<int, array<string, mixed>>
@@ -155,9 +172,7 @@ function asms_get_ai_provider_preferences() {
         $preferences[] = [
             'name'                    => 'rAIven',
             'provider_id'             => 'raiven',
-            // The connector owns model discovery. Do not forward legacy saved
-            // model values such as gpt-4 to the rAIven completion endpoint.
-            'model_preference'        => null,
+            'model_preference'        => ['raiven', asms_get_raiven_model_id()],
             'native_structured_output' => false,
         ];
     }

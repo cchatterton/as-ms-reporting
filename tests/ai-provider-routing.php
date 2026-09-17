@@ -140,8 +140,8 @@ $result = asms_generate_ai_text('Input', 'Instructions');
 asms_test_assert('rAIven summary' === $result, 'Configured rAIven should be preferred.');
 asms_test_assert(['raiven'] === array_column($asms_test_attempts, 'provider'), 'OpenAI should not run after rAIven succeeds.');
 asms_test_assert(
-    [] === $asms_test_attempts[0]['model'],
-    'A stale connector model must never be forwarded to rAIven.'
+    ['raiven', 'qwen3.8-flash-next-nvfp4'] === $asms_test_attempts[0]['model'],
+    'The verified rAIven model should be selected instead of a stale connector model.'
 );
 $usage = asms_get_last_ai_request();
 asms_test_assert('raiven' === $usage['provider_id'] && !$usage['used_fallback'], 'Successful rAIven usage should be recorded.');
@@ -224,19 +224,19 @@ asms_test_assert(
 
 $asms_test_raiven_model = '';
 asms_test_reset([
-    'raiven' => 'Automatic model success',
+    'raiven' => 'Explicit model success',
     'openai' => 'Unexpected',
 ]);
 $result = asms_generate_ai_text('Input', 'Instructions');
 $usage = asms_get_last_ai_request();
-asms_test_assert('Automatic model success' === $result, 'rAIven should support native automatic model selection.');
+asms_test_assert('Explicit model success' === $result, 'rAIven should use its explicitly selected native model.');
 asms_test_assert(
-    [] === $asms_test_attempts[0]['model'],
-    'No explicit model preference should be sent when rAIven is configured for automatic model selection.'
+    ['raiven', 'qwen3.8-flash-next-nvfp4'] === $asms_test_attempts[0]['model'],
+    'Legacy empty model settings must not remove the explicit rAIven model preference.'
 );
 asms_test_assert(
-    'Automatic rAIven model selection' === $usage['model'],
-    'Automatic rAIven model selection should be identified in the usage panel.'
+    'qwen3.8-flash-next-nvfp4' === $usage['model'],
+    'The selected rAIven model should be identified in the usage panel.'
 );
 
 echo "AI provider routing tests passed.\n";

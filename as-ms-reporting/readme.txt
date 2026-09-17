@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.11
+Stable tag: 1.4.12
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -38,6 +38,12 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.12 =
+
+* Explicitly selected rAIven's verified qwen3.8-flash-next-nvfp4 model for native AI requests.
+* Avoided automatic selection of the advertised gpt-4 model, which has no active rAIven endpoint.
+* Added the ASMS_RAIVEN_MODEL constant as an optional account-specific model override.
 
 = 1.4.11 =
 
