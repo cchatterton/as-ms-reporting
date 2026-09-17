@@ -1,4 +1,4 @@
 {
-  "version": "1.4.10",
-  "body": "Fixes rAIven routing by trusting its native WordPress connector authentication, supports automatic rAIven model selection, and retains OpenAI fallback for failed requests."
+  "version": "1.4.11",
+  "body": "Stops forwarding stale legacy model settings such as gpt-4 and delegates model discovery and selection entirely to the native rAIven provider."
 }

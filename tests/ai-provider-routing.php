@@ -24,7 +24,7 @@ function wp_json_encode($value) {
 }
 
 $asms_test_raiven_key = 'configured-key';
-$asms_test_raiven_model = 'raiven-test-model';
+$asms_test_raiven_model = 'gpt-4';
 $asms_test_raiven_models = ['raiven-test-model'];
 $asms_test_results = [];
 $asms_test_attempts = [];
@@ -139,6 +139,10 @@ asms_test_reset([
 $result = asms_generate_ai_text('Input', 'Instructions');
 asms_test_assert('rAIven summary' === $result, 'Configured rAIven should be preferred.');
 asms_test_assert(['raiven'] === array_column($asms_test_attempts, 'provider'), 'OpenAI should not run after rAIven succeeds.');
+asms_test_assert(
+    [] === $asms_test_attempts[0]['model'],
+    'A stale connector model must never be forwarded to rAIven.'
+);
 $usage = asms_get_last_ai_request();
 asms_test_assert('raiven' === $usage['provider_id'] && !$usage['used_fallback'], 'Successful rAIven usage should be recorded.');
 asms_test_assert(asms_store_last_ai_request(42, 'Monthly summary'), 'Successful usage should be persisted to account meta.');

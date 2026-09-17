@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PLUGIN_SLUG="as-ms-reporting"
-EXPECTED_VERSION="1.4.10"
+EXPECTED_VERSION="1.4.11"
 REPOSITORY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGIN_DIR="$REPOSITORY_DIR/$PLUGIN_SLUG"
 MAIN_FILE="$PLUGIN_DIR/$PLUGIN_SLUG.php"
@@ -12,7 +12,7 @@ grep -q "^ \* Version: $EXPECTED_VERSION$" "$MAIN_FILE"
 grep -q '^ \* Requires at least: 7.0$' "$MAIN_FILE"
 grep -q "define( 'ASMS_VERSION', '$EXPECTED_VERSION' );" "$MAIN_FILE"
 grep -q "^Stable tag: $EXPECTED_VERSION$" "$PLUGIN_DIR/readme.txt"
-grep -q '"version": "1.4.10"' "$REPOSITORY_DIR/update.json"
+grep -q '"version": "1.4.11"' "$REPOSITORY_DIR/update.json"
 grep -q 'margin-block: 0 1rem !important;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'padding: 1rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'right: 0.875rem !important;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
@@ -25,9 +25,8 @@ grep -q 'flex: 0 0 3.75rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'width: calc(100% - 2rem);' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'border-top: 0;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'asms_render_account_mini_chart' "$PLUGIN_DIR/functions/shortcodes.php"
-grep -q 'function asms_get_raiven_model_preference' "$PLUGIN_DIR/functions/ms-data-pipeline.php"
 grep -q 'function asms_is_raiven_connector_available' "$PLUGIN_DIR/functions/ms-data-pipeline.php"
-grep -Fq "return '' !== \$model ? ['raiven', \$model] : null;" "$PLUGIN_DIR/functions/ms-data-pipeline.php"
+grep -q "'model_preference'        => null" "$PLUGIN_DIR/functions/ms-data-pipeline.php"
 grep -q "'model_preference'        => \['openai'," "$PLUGIN_DIR/functions/ms-data-pipeline.php"
 grep -q -- "->using_provider(\$provider\['provider_id'\])" "$PLUGIN_DIR/functions/ms-data-pipeline.php"
 grep -q 'function asms_ai_json_matches_schema' "$PLUGIN_DIR/functions/ms-data-pipeline.php"
@@ -36,8 +35,8 @@ grep -q "add_meta_box('ms_ai_api_usage', 'Last AI API Used'" "$PLUGIN_DIR/functi
 grep -q "asms_store_last_ai_request(\$id, 'Monthly summary')" "$PLUGIN_DIR/functions/cpt-meta.php"
 grep -q "asms_store_last_ai_request(\$id, 'Report classification')" "$PLUGIN_DIR/functions/cpt-meta.php"
 
-if grep -Eq 'as329_rai_get_api_key|as329_rai_get_model_ids' "$PLUGIN_DIR/functions/ms-data-pipeline.php"; then
-    echo "Legacy rAIven credential or model-discovery checks are still present." >&2
+if grep -Eq 'as329_rai_get_api_key|as329_rai_get_model_ids|as329_rai_get_settings' "$PLUGIN_DIR/functions/ms-data-pipeline.php"; then
+    echo "Legacy rAIven credential, settings, or model-discovery checks are still present." >&2
     exit 1
 fi
 

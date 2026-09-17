@@ -145,28 +145,6 @@ function asms_is_raiven_connector_available() {
 }
 
 /**
- * Return the selected rAIven model preference when one has been saved.
- *
- * @return array<int, string>|null
- */
-function asms_get_raiven_model_preference() {
-    if (!function_exists('as329_rai_get_settings')) {
-        return null;
-    }
-
-    try {
-        $settings = as329_rai_get_settings();
-        $model = is_array($settings) && is_string($settings['model'] ?? null)
-            ? trim($settings['model'])
-            : '';
-
-        return '' !== $model ? ['raiven', $model] : null;
-    } catch (Throwable $error) {
-        return null;
-    }
-}
-
-/**
  * Return AI providers in the order requests should be attempted.
  *
  * @return array<int, array<string, mixed>>
@@ -177,7 +155,9 @@ function asms_get_ai_provider_preferences() {
         $preferences[] = [
             'name'                    => 'rAIven',
             'provider_id'             => 'raiven',
-            'model_preference'        => asms_get_raiven_model_preference(),
+            // The connector owns model discovery. Do not forward legacy saved
+            // model values such as gpt-4 to the rAIven completion endpoint.
+            'model_preference'        => null,
             'native_structured_output' => false,
         ];
     }

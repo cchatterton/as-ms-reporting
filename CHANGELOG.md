@@ -2,6 +2,11 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.11 - 2026-09-17
+
+- Stopped forwarding stale legacy model settings such as `gpt-4` to rAIven.
+- Delegated model discovery and selection entirely to the native rAIven provider.
+
 ## 1.4.10 - 2026-09-17
 
 - Removed the legacy rAIven credential and model-discovery pre-check that could disagree with WordPress Connectors.
