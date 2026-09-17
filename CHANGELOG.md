@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.10 - 2026-09-17
+
+- Removed the legacy rAIven credential and model-discovery pre-check that could disagree with WordPress Connectors.
+- Delegated rAIven authentication and availability to its registered native WordPress AI provider.
+- Supported automatic rAIven model selection when no model is saved, while retaining OpenAI fallback for failed requests.
+
 ## 1.4.9 - 2026-09-17
 
 - Added a Last AI API Used panel at the bottom of each MS Account edit screen.

@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.9
+Stable tag: 1.4.10
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -38,6 +38,12 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.10 =
+
+* Removed the legacy rAIven credential and model-discovery pre-check that could disagree with WordPress Connectors.
+* Delegated rAIven authentication and availability to its registered native WordPress AI provider.
+* Supported automatic rAIven model selection when no model is saved, while retaining OpenAI fallback for failed requests.
 
 = 1.4.9 =
 

@@ -36,6 +36,9 @@ function as329_rai_get_settings() {
     return ['model' => $asms_test_raiven_model];
 }
 
+function as329_rai_register_ai_provider() {
+}
+
 function as329_rai_get_api_key() {
     global $asms_test_raiven_key;
 
@@ -85,6 +88,7 @@ class ASMS_Test_AI_Builder {
         $asms_test_attempts[] = [
             'provider'     => $provider,
             'instructions' => $this->instructions,
+            'model'        => $this->model_preference,
             'structured'   => $this->structured,
         ];
 
@@ -199,16 +203,36 @@ asms_test_assert(
 
 $asms_test_raiven_key = '';
 asms_test_reset([
-    'raiven' => 'Unexpected',
-    'openai' => 'OpenAI only',
+    'raiven' => 'Native connector success',
+    'openai' => 'Unexpected',
 ]);
 $result = asms_generate_ai_text('Input', 'Instructions');
-asms_test_assert('OpenAI only' === $result, 'Unconfigured rAIven should be skipped.');
-asms_test_assert(['openai'] === array_column($asms_test_attempts, 'provider'), 'Only OpenAI should run when rAIven is unconfigured.');
+asms_test_assert(
+    'Native connector success' === $result,
+    'The native rAIven provider should be tried even when its legacy key helper cannot read the WordPress connector key.'
+);
+asms_test_assert(['raiven'] === array_column($asms_test_attempts, 'provider'), 'The native rAIven provider should remain authoritative.');
 $usage = asms_get_last_ai_request();
 asms_test_assert(
-    'rAIven unavailable or not configured' === $usage['route'],
-    'Direct OpenAI usage should explain why rAIven was skipped.'
+    'raiven' === $usage['provider_id'],
+    'Successful native rAIven usage should be recorded even when the legacy key helper is empty.'
+);
+
+$asms_test_raiven_model = '';
+asms_test_reset([
+    'raiven' => 'Automatic model success',
+    'openai' => 'Unexpected',
+]);
+$result = asms_generate_ai_text('Input', 'Instructions');
+$usage = asms_get_last_ai_request();
+asms_test_assert('Automatic model success' === $result, 'rAIven should support native automatic model selection.');
+asms_test_assert(
+    [] === $asms_test_attempts[0]['model'],
+    'No explicit model preference should be sent when rAIven is configured for automatic model selection.'
+);
+asms_test_assert(
+    'Automatic rAIven model selection' === $usage['model'],
+    'Automatic rAIven model selection should be identified in the usage panel.'
 );
 
 echo "AI provider routing tests passed.\n";

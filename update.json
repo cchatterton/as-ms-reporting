@@ -1,4 +1,4 @@
 {
-  "version": "1.4.9",
-  "body": "Adds a Last AI API Used panel to MS Account edit screens, recording the successful provider, model, operation, routing result and completion time."
+  "version": "1.4.10",
+  "body": "Fixes rAIven routing by trusting its native WordPress connector authentication, supports automatic rAIven model selection, and retains OpenAI fallback for failed requests."
 }

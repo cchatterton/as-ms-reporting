@@ -132,16 +132,25 @@ function as_ms_parse_csv($raw, $post_id) {
 // ==========================
 
 /**
- * Return the configured rAIven model preference when the connector is ready.
+ * Check whether the rAIven connector plugin is active.
+ *
+ * Native connector authentication is deliberately not inspected here. WordPress
+ * injects that authentication into the registered provider at request time.
+ *
+ * @return bool
+ */
+function asms_is_raiven_connector_available() {
+    return function_exists('as329_rai_register_ai_provider')
+        || (defined('AS329_RAI_PROVIDER_ID') && 'raiven' === AS329_RAI_PROVIDER_ID);
+}
+
+/**
+ * Return the selected rAIven model preference when one has been saved.
  *
  * @return array<int, string>|null
  */
 function asms_get_raiven_model_preference() {
-    if (
-        !function_exists('as329_rai_get_settings')
-        || !function_exists('as329_rai_get_api_key')
-        || !function_exists('as329_rai_get_model_ids')
-    ) {
+    if (!function_exists('as329_rai_get_settings')) {
         return null;
     }
 
@@ -151,17 +160,7 @@ function asms_get_raiven_model_preference() {
             ? trim($settings['model'])
             : '';
 
-        if ('' === $model || '' === trim((string) as329_rai_get_api_key())) {
-            return null;
-        }
-
-        $available_models = as329_rai_get_model_ids();
-
-        if (!is_array($available_models) || !in_array($model, $available_models, true)) {
-            return null;
-        }
-
-        return ['raiven', $model];
+        return '' !== $model ? ['raiven', $model] : null;
     } catch (Throwable $error) {
         return null;
     }
@@ -174,13 +173,11 @@ function asms_get_raiven_model_preference() {
  */
 function asms_get_ai_provider_preferences() {
     $preferences = [];
-    $raiven = asms_get_raiven_model_preference();
-
-    if ($raiven) {
+    if (asms_is_raiven_connector_available()) {
         $preferences[] = [
             'name'                    => 'rAIven',
             'provider_id'             => 'raiven',
-            'model_preference'        => $raiven,
+            'model_preference'        => asms_get_raiven_model_preference(),
             'native_structured_output' => false,
         ];
     }
@@ -395,8 +392,11 @@ function asms_generate_ai_text($input, $instructions, $schema = null) {
 
             $builder = wp_ai_client_prompt($input)
                 ->using_system_instruction($provider_instructions)
-                ->using_provider($provider['provider_id'])
-                ->using_model_preference($provider['model_preference']);
+                ->using_provider($provider['provider_id']);
+
+            if (!empty($provider['model_preference'])) {
+                $builder = $builder->using_model_preference($provider['model_preference']);
+            }
 
             if (is_array($schema) && $provider['native_structured_output']) {
                 $builder = $builder->as_json_response($schema);
@@ -424,6 +424,10 @@ function asms_generate_ai_text($input, $instructions, $schema = null) {
             $model = is_array($model_preference)
                 ? (string) ($model_preference[1] ?? '')
                 : (string) $model_preference;
+
+            if ('' === $model && 'raiven' === $provider['provider_id']) {
+                $model = 'Automatic rAIven model selection';
+            }
             $used_fallback = 'openai' === $provider['provider_id'] && !empty($errors);
             $route = 'Preferred provider';
 
