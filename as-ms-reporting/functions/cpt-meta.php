@@ -222,6 +222,31 @@ add_meta_box('ms_variations', 'Variations (JSON)', function($p){
 
     }, 'ms_account');
 
+    add_meta_box('ms_ai_api_usage', 'Last AI API Used', function($p){
+        $usage = get_post_meta($p->ID, '_asms_last_ai_request', true);
+
+        if (!is_array($usage) || empty($usage['provider_name'])) {
+            echo '<p>No successful AI request has been recorded for this account yet.</p>';
+            return;
+        }
+
+        $timestamp = !empty($usage['timestamp'])
+            ? mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $usage['timestamp'])
+            : '';
+
+        echo '<table class="widefat striped ms-ai-usage-table"><tbody>';
+        echo '<tr><th scope="row">API</th><td><strong>' . esc_html($usage['provider_name']) . '</strong></td></tr>';
+        echo '<tr><th scope="row">Model</th><td><code>' . esc_html($usage['model'] ?? '') . '</code></td></tr>';
+        echo '<tr><th scope="row">Operation</th><td>' . esc_html($usage['operation'] ?? '') . '</td></tr>';
+        echo '<tr><th scope="row">Routing</th><td>' . esc_html($usage['route'] ?? '') . '</td></tr>';
+        echo '<tr><th scope="row">Completed</th><td>' . esc_html($timestamp) . '</td></tr>';
+        echo '</tbody></table>';
+
+        if (!empty($usage['used_fallback'])) {
+            echo '<p class="description"><strong>OpenAI fallback:</strong> rAIven was attempted first but did not complete this request successfully.</p>';
+        }
+    }, 'ms_account', 'advanced', 'low');
+
 
 });
 
@@ -313,6 +338,7 @@ add_action('save_post', function($id){
     
             if ($summary !== '') {
                 update_post_meta($id, 'ms_current_month_ai_summary', $summary);
+                asms_store_last_ai_request($id, 'Monthly summary');
             }
         }
     }
@@ -372,6 +398,7 @@ if (!empty($missing)) {
         }
 
         delete_post_meta($id, 'ms_classification_error');
+        asms_store_last_ai_request($id, 'Report classification');
 
         $existing = json_decode(get_post_meta($id,'ms_report_data_json',true),true) ?: [];
 

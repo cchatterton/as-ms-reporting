@@ -316,6 +316,37 @@ function asms_ai_json_matches_schema($text, $schema) {
 }
 
 /**
+ * Return metadata for the most recent successful AI request in this process.
+ *
+ * @return array<string, mixed>|null
+ */
+function asms_get_last_ai_request() {
+    $request = $GLOBALS['asms_last_ai_request'] ?? null;
+
+    return is_array($request) ? $request : null;
+}
+
+/**
+ * Save the most recent successful AI request against an account.
+ *
+ * @param int    $post_id   Account post ID.
+ * @param string $operation Human-readable operation label.
+ * @return bool
+ */
+function asms_store_last_ai_request($post_id, $operation) {
+    $request = asms_get_last_ai_request();
+
+    if (!$request || $post_id <= 0) {
+        return false;
+    }
+
+    $request['operation'] = sanitize_text_field($operation);
+    $request['timestamp'] = current_time('mysql');
+
+    return false !== update_post_meta($post_id, '_asms_last_ai_request', $request);
+}
+
+/**
  * Generate text through rAIven when configured, then fall back to OpenAI.
  *
  * @param string     $input        User input.
@@ -324,6 +355,8 @@ function asms_ai_json_matches_schema($text, $schema) {
  * @return string|WP_Error
  */
 function asms_generate_ai_text($input, $instructions, $schema = null) {
+    unset($GLOBALS['asms_last_ai_request']);
+
     if (!function_exists('wp_ai_client_prompt')) {
         return new WP_Error(
             'asms_wordpress_ai_client_unavailable',
@@ -341,6 +374,14 @@ function asms_generate_ai_text($input, $instructions, $schema = null) {
     }
 
     $errors = [];
+    $raiven_was_candidate = false;
+
+    foreach ($provider_preferences as $provider_preference) {
+        if ('raiven' === $provider_preference['provider_id']) {
+            $raiven_was_candidate = true;
+            break;
+        }
+    }
 
     foreach ($provider_preferences as $provider) {
         try {
@@ -378,6 +419,27 @@ function asms_generate_ai_text($input, $instructions, $schema = null) {
                     continue;
                 }
             }
+
+            $model_preference = $provider['model_preference'];
+            $model = is_array($model_preference)
+                ? (string) ($model_preference[1] ?? '')
+                : (string) $model_preference;
+            $used_fallback = 'openai' === $provider['provider_id'] && !empty($errors);
+            $route = 'Preferred provider';
+
+            if ('openai' === $provider['provider_id']) {
+                $route = $used_fallback
+                    ? 'Fallback after rAIven failed'
+                    : ($raiven_was_candidate ? 'OpenAI selected' : 'rAIven unavailable or not configured');
+            }
+
+            $GLOBALS['asms_last_ai_request'] = [
+                'provider_id'   => $provider['provider_id'],
+                'provider_name' => $provider['name'],
+                'model'         => $model,
+                'used_fallback' => $used_fallback,
+                'route'         => $route,
+            ];
 
             return $text;
         } catch (Throwable $error) {
@@ -538,6 +600,7 @@ function asms_reclassify_uncategorized_report_data($post_id) {
     }
 
     update_post_meta($post_id, 'ms_report_data_json', wp_json_encode($report_data));
+    asms_store_last_ai_request($post_id, 'Report reclassification');
 
     return count($classified_rows);
 }

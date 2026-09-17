@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.9 - 2026-09-17
+
+- Added a Last AI API Used panel at the bottom of each MS Account edit screen.
+- Recorded the successful provider, model, operation, routing result and completion time.
+- Identified when OpenAI completed a request as the fallback after rAIven failed.
+
 ## 1.4.8 - 2026-09-16
 
 - Preferred a configured rAIven Connector and its selected model for AI classifications and summaries.

@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.8
+Stable tag: 1.4.9
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -38,6 +38,12 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.9 =
+
+* Added a Last AI API Used panel at the bottom of each MS Account edit screen.
+* Recorded the successful provider, model, operation, routing result and completion time.
+* Identified when OpenAI completed a request as the fallback after rAIven failed.
 
 = 1.4.8 =
 

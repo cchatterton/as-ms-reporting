@@ -1,4 +1,4 @@
 {
-  "version": "1.4.8",
-  "body": "Prefers a configured rAIven provider for classifications and summaries, with validated structured responses and automatic OpenAI fallback."
+  "version": "1.4.9",
+  "body": "Adds a Last AI API Used panel to MS Account edit screens, recording the successful provider, model, operation, routing result and completion time."
 }

@@ -31,3 +31,11 @@ textarea.ms-meta-field {
     max-width: 100%;
     box-sizing: border-box;
 }
+
+.ms-ai-usage-table th {
+    width: 10rem;
+}
+
+.ms-ai-usage-table code {
+    word-break: break-word;
+}

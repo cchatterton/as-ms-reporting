@@ -28,6 +28,7 @@ $asms_test_raiven_model = 'raiven-test-model';
 $asms_test_raiven_models = ['raiven-test-model'];
 $asms_test_results = [];
 $asms_test_attempts = [];
+$asms_test_post_meta = [];
 
 function as329_rai_get_settings() {
     global $asms_test_raiven_model;
@@ -95,6 +96,22 @@ function wp_ai_client_prompt($input) {
     return new ASMS_Test_AI_Builder();
 }
 
+function sanitize_text_field($value) {
+    return trim((string) $value);
+}
+
+function current_time($type) {
+    return '2026-09-17 10:30:00';
+}
+
+function update_post_meta($post_id, $key, $value) {
+    global $asms_test_post_meta;
+
+    $asms_test_post_meta[$post_id][$key] = $value;
+
+    return true;
+}
+
 require dirname(__DIR__) . '/as-ms-reporting/functions/ms-data-pipeline.php';
 
 function asms_test_assert($condition, $message) {
@@ -118,6 +135,13 @@ asms_test_reset([
 $result = asms_generate_ai_text('Input', 'Instructions');
 asms_test_assert('rAIven summary' === $result, 'Configured rAIven should be preferred.');
 asms_test_assert(['raiven'] === array_column($asms_test_attempts, 'provider'), 'OpenAI should not run after rAIven succeeds.');
+$usage = asms_get_last_ai_request();
+asms_test_assert('raiven' === $usage['provider_id'] && !$usage['used_fallback'], 'Successful rAIven usage should be recorded.');
+asms_test_assert(asms_store_last_ai_request(42, 'Monthly summary'), 'Successful usage should be persisted to account meta.');
+asms_test_assert(
+    'Monthly summary' === $asms_test_post_meta[42]['_asms_last_ai_request']['operation'],
+    'Persisted usage should include the operation label.'
+);
 
 asms_test_reset([
     'raiven' => new WP_Error('raiven_failed', 'rAIven failed.'),
@@ -126,6 +150,8 @@ asms_test_reset([
 $result = asms_generate_ai_text('Input', 'Instructions');
 asms_test_assert('OpenAI fallback' === $result, 'OpenAI should run when rAIven generation fails.');
 asms_test_assert(['raiven', 'openai'] === array_column($asms_test_attempts, 'provider'), 'Fallback order should be rAIven then OpenAI.');
+$usage = asms_get_last_ai_request();
+asms_test_assert('openai' === $usage['provider_id'] && $usage['used_fallback'], 'OpenAI fallback usage should be recorded.');
 
 $schema = [
     'type'                 => 'object',
@@ -179,5 +205,10 @@ asms_test_reset([
 $result = asms_generate_ai_text('Input', 'Instructions');
 asms_test_assert('OpenAI only' === $result, 'Unconfigured rAIven should be skipped.');
 asms_test_assert(['openai'] === array_column($asms_test_attempts, 'provider'), 'Only OpenAI should run when rAIven is unconfigured.');
+$usage = asms_get_last_ai_request();
+asms_test_assert(
+    'rAIven unavailable or not configured' === $usage['route'],
+    'Direct OpenAI usage should explain why rAIven was skipped.'
+);
 
 echo "AI provider routing tests passed.\n";
