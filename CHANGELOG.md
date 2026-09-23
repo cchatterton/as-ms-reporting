@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.13 - 2026-09-23
+
+- Titled the twelve-column portfolio heatmap **MS Agreement Age**.
+- Replaced the pace distribution with a **Month Actuals** freshness heatmap for Month -3, Month -2 and Month -1.
+- Counted customer cards by their latest reported calendar month in the new Month Actuals table.
+
 ## 1.4.12 - 2026-09-17
 
 - Explicitly selected rAIven's verified `qwen3.8-flash-next-nvfp4` model for native AI requests.

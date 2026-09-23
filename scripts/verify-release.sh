@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PLUGIN_SLUG="as-ms-reporting"
-EXPECTED_VERSION="1.4.12"
+EXPECTED_VERSION="1.4.13"
 REPOSITORY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGIN_DIR="$REPOSITORY_DIR/$PLUGIN_SLUG"
 MAIN_FILE="$PLUGIN_DIR/$PLUGIN_SLUG.php"
@@ -12,7 +12,7 @@ grep -q "^ \* Version: $EXPECTED_VERSION$" "$MAIN_FILE"
 grep -q '^ \* Requires at least: 7.0$' "$MAIN_FILE"
 grep -q "define( 'ASMS_VERSION', '$EXPECTED_VERSION' );" "$MAIN_FILE"
 grep -q "^Stable tag: $EXPECTED_VERSION$" "$PLUGIN_DIR/readme.txt"
-grep -q '"version": "1.4.12"' "$REPOSITORY_DIR/update.json"
+grep -q '"version": "1.4.13"' "$REPOSITORY_DIR/update.json"
 grep -q 'margin-block: 0 1rem !important;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'padding: 1rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'right: 0.875rem !important;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
@@ -25,6 +25,10 @@ grep -q 'flex: 0 0 3.75rem;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'width: calc(100% - 2rem);' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'border-top: 0;' "$PLUGIN_DIR/styles/as-ms-reporting.css"
 grep -q 'asms_render_account_mini_chart' "$PLUGIN_DIR/functions/shortcodes.php"
+grep -q "'MS Agreement Age'" "$PLUGIN_DIR/functions/shortcodes.php"
+grep -q "'Month Actuals'" "$PLUGIN_DIR/functions/shortcodes.php"
+grep -q "'Month -3'" "$PLUGIN_DIR/functions/shortcodes.php"
+grep -q "'Month -1'" "$PLUGIN_DIR/functions/shortcodes.php"
 grep -q 'function asms_is_raiven_connector_available' "$PLUGIN_DIR/functions/ms-data-pipeline.php"
 grep -q 'function asms_get_raiven_model_id' "$PLUGIN_DIR/functions/ms-data-pipeline.php"
 grep -q "'qwen3.8-flash-next-nvfp4'" "$PLUGIN_DIR/functions/ms-data-pipeline.php"
@@ -78,6 +82,9 @@ test ! -f "$PLUGIN_DIR/functions/config.php"
 while IFS= read -r php_file; do
     php -l "$php_file" >/dev/null
 done < <(find "$PLUGIN_DIR" -type f -name '*.php' -print)
+
+php "$REPOSITORY_DIR/tests/portfolio-summary.php" >/dev/null
+php "$REPOSITORY_DIR/tests/ai-provider-routing.php" >/dev/null
 
 test -f "$PLUGIN_DIR/LICENSE"
 test -f "$PLUGIN_DIR/readme.txt"

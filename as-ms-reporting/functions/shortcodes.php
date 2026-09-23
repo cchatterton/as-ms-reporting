@@ -175,11 +175,10 @@ function asms_get_accounts_summary($grouped_accounts) {
         'remaining_balance' => 0,
         'suggested_pace'    => 0,
         'months_delivered'  => array_fill(0, 13, 0),
-        'guidance'          => [
-            'Increase Pace'   => 0,
-            'Stay the Course' => 0,
-            'Decrease Pace'   => 0,
-            'Closed'          => 0,
+        'month_actuals'     => [
+            -3 => 0,
+            -2 => 0,
+            -1 => 0,
         ],
     ];
 
@@ -194,13 +193,42 @@ function asms_get_accounts_summary($grouped_accounts) {
             $summary['suggested_pace'] += (float) $data['suggested_pace'];
             $summary['months_delivered'][$months_delivered]++;
 
-            if (isset($summary['guidance'][$data['guidance']])) {
-                $summary['guidance'][$data['guidance']]++;
+            $relative_month = asms_get_relative_report_month($data['latest_month'] ?? '');
+
+            if (isset($summary['month_actuals'][$relative_month])) {
+                $summary['month_actuals'][$relative_month]++;
             }
         }
     }
 
     return $summary;
+}
+
+/**
+ * Return a report month's offset from the current calendar month.
+ *
+ * For example, the previous calendar month is -1.
+ *
+ * @param string $report_month Month formatted as Y-m.
+ * @return int|null
+ */
+function asms_get_relative_report_month($report_month) {
+    if (!is_string($report_month) || !preg_match('/^(\d{4})-(\d{2})$/', $report_month, $matches)) {
+        return null;
+    }
+
+    $report_year = (int) $matches[1];
+    $report_month_number = (int) $matches[2];
+
+    if ($report_month_number < 1 || $report_month_number > 12) {
+        return null;
+    }
+
+    $current_year = (int) wp_date('Y');
+    $current_month_number = (int) wp_date('n');
+
+    return (($report_year * 12) + $report_month_number)
+        - (($current_year * 12) + $current_month_number);
 }
 
 /**
@@ -241,7 +269,7 @@ function asms_render_accounts_total_card($summary) {
 }
 
 /**
- * Render the AlphaSys-only delivery and guidance heatmap tables.
+ * Render the AlphaSys-only agreement-age and report-recency heatmap tables.
  *
  * @param array<string, mixed> $summary Aggregated card data.
  * @return string
@@ -253,20 +281,20 @@ function asms_render_accounts_heatmaps($summary) {
         $month_counts['Month ' . $month] = $summary['months_delivered'][$month] ?? 0;
     }
 
-    $guidance_counts = [
-        'Increase Pace'   => $summary['guidance']['Increase Pace'] ?? 0,
-        'Stay the Course' => $summary['guidance']['Stay the Course'] ?? 0,
-        'Decrease Pace'   => $summary['guidance']['Decrease Pace'] ?? 0,
+    $month_actual_counts = [
+        'Month -3' => $summary['month_actuals'][-3] ?? 0,
+        'Month -2' => $summary['month_actuals'][-2] ?? 0,
+        'Month -1' => $summary['month_actuals'][-1] ?? 0,
     ];
 
     $output = '<div class="ms-portfolio-heatmaps">';
     $output .= asms_render_accounts_heatmap_table(
-        'Months',
+        'MS Agreement Age',
         $month_counts
     );
     $output .= asms_render_accounts_heatmap_table(
-        'Pace',
-        $guidance_counts
+        'Month Actuals',
+        $month_actual_counts
     );
     $output .= '</div>';
 
@@ -282,7 +310,9 @@ function asms_render_accounts_heatmaps($summary) {
  */
 function asms_render_accounts_heatmap_table($title, $counts) {
     $maximum = $counts ? max($counts) : 0;
-    $output = '<section class="ms-portfolio-heatmap ' . esc_attr($title) . '">';
+    $output = '<section class="ms-portfolio-heatmap ms-portfolio-heatmap-'
+        . esc_attr(sanitize_html_class(sanitize_title($title))) . '">';
+    $output .= '<h3>' . esc_html($title) . '</h3>';
     $output .= '<table><thead><tr>';
 
     foreach ($counts as $label => $count) {
