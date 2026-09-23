@@ -3,7 +3,7 @@ Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.13
+Stable tag: 1.4.14
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -38,6 +38,12 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.14 =
+
+* Restored the Increase Pace, Stay the Course and Decrease Pace heatmap as Pace Guidance.
+* Changed Month Actuals from customer counts to portfolio dollar totals for Month -3, Month -2 and Month -1.
+* Sized both three-column heatmaps to exactly three columns of the twelve-column agreement-age table.
 
 = 1.4.13 =
 

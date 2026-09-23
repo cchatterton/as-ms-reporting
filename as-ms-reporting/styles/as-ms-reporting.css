@@ -365,6 +365,10 @@ body:has(.ms-related-accounts) {
     margin: 0 0 0.625rem;
 }
 
+.ms-portfolio-heatmap-compact {
+    width: 25%;
+}
+
 .ms-portfolio-heatmap table {
     width: 100%;
     overflow: hidden;
@@ -390,6 +394,12 @@ body:has(.ms-related-accounts) {
     color: var(--ms-navy-900);
     background: #edf3f7;
     font-weight: 700;
+}
+
+@media (max-width: 45rem) {
+    .ms-portfolio-heatmap-compact {
+        width: 100%;
+    }
 }
 
 .ms-report {

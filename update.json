@@ -1,4 +1,4 @@
 {
-  "version": "1.4.13",
-  "body": "Adds titled MS Agreement Age and Month Actuals portfolio heatmaps, including Month -3, Month -2 and Month -1 data-freshness counts."
+  "version": "1.4.14",
+  "body": "Restores the Pace Guidance heatmap, changes Month Actuals to dollar totals, and sizes both three-column heatmaps to one quarter of the twelve-column table width."
 }

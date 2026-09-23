@@ -50,12 +50,21 @@ $base_data = [
     'suggested_pace'    => 10,
     'months_delivered'  => 4,
     'guidance'          => 'Stay the Course',
+    'monthly_actuals_by_month' => [
+        '2026-06' => 100,
+        '2026-07' => 200,
+        '2026-08' => 300,
+    ],
 ];
 
 $grouped_accounts = [
     '2026-08' => [
         ['data' => array_merge($base_data, ['latest_month' => '2026-08'])],
-        ['data' => array_merge($base_data, ['latest_month' => '2026-08', 'months_delivered' => 6])],
+        ['data' => array_merge($base_data, [
+            'latest_month' => '2026-08',
+            'months_delivered' => 6,
+            'guidance' => 'Increase Pace',
+        ])],
     ],
     '2026-07' => [
         ['data' => array_merge($base_data, ['latest_month' => '2026-07', 'months_delivered' => 6])],
@@ -72,15 +81,23 @@ $summary = asms_get_accounts_summary($grouped_accounts);
 
 asms_portfolio_assert(1 === $summary['months_delivered'][4], 'Agreement age should count cards by delivered month.');
 asms_portfolio_assert(2 === $summary['months_delivered'][6], 'Repeated agreement ages should be aggregated.');
-asms_portfolio_assert(2 === $summary['month_actuals'][-1], 'Month -1 should count August reports in September.');
-asms_portfolio_assert(1 === $summary['month_actuals'][-2], 'Month -2 should count July reports in September.');
-asms_portfolio_assert(1 === $summary['month_actuals'][-3], 'Month -3 should count June reports in September.');
+asms_portfolio_assert(1500.0 === $summary['month_actuals'][-1], 'Month -1 should total August actuals in September.');
+asms_portfolio_assert(1000.0 === $summary['month_actuals'][-2], 'Month -2 should total July actuals in September.');
+asms_portfolio_assert(500.0 === $summary['month_actuals'][-3], 'Month -3 should total June actuals in September.');
+asms_portfolio_assert(1 === $summary['guidance']['Increase Pace'], 'Increase Pace cards should remain in the pace summary.');
+asms_portfolio_assert(4 === $summary['guidance']['Stay the Course'], 'Stay the Course cards should remain in the pace summary.');
 
 $html = asms_render_accounts_heatmaps($summary);
 
 asms_portfolio_assert(false !== strpos($html, '<h3>MS Agreement Age</h3>'), 'Agreement-age title should render.');
 asms_portfolio_assert(false !== strpos($html, '<h3>Month Actuals</h3>'), 'Month-actuals title should render.');
+asms_portfolio_assert(false !== strpos($html, '<h3>Pace Guidance</h3>'), 'Pace-guidance title should render.');
 asms_portfolio_assert(false !== strpos($html, '<th scope="col">Month -3</th>'), 'Month -3 column should render.');
 asms_portfolio_assert(false !== strpos($html, '<th scope="col">Month -1</th>'), 'Month -1 column should render.');
+asms_portfolio_assert(false !== strpos($html, '>$1,500</td>'), 'Month Actuals should render portfolio totals as currency.');
+asms_portfolio_assert(
+    2 === substr_count($html, 'ms-portfolio-heatmap-compact'),
+    'Both three-column heatmaps should use the compact quarter-width layout.'
+);
 
 echo "Portfolio summary tests passed.\n";

@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.14 - 2026-09-23
+
+- Restored the **Increase Pace**, **Stay the Course** and **Decrease Pace** heatmap as **Pace Guidance**.
+- Changed **Month Actuals** from customer counts to portfolio dollar totals for Month -3, Month -2 and Month -1.
+- Sized both three-column heatmaps to exactly three columns of the twelve-column agreement-age table.
+
 ## 1.4.13 - 2026-09-23
 
 - Titled the twelve-column portfolio heatmap **MS Agreement Age**.

@@ -176,9 +176,15 @@ function asms_get_accounts_summary($grouped_accounts) {
         'suggested_pace'    => 0,
         'months_delivered'  => array_fill(0, 13, 0),
         'month_actuals'     => [
-            -3 => 0,
-            -2 => 0,
-            -1 => 0,
+            -3 => 0.0,
+            -2 => 0.0,
+            -1 => 0.0,
+        ],
+        'guidance'          => [
+            'Increase Pace'   => 0,
+            'Stay the Course' => 0,
+            'Decrease Pace'   => 0,
+            'Closed'          => 0,
         ],
     ];
 
@@ -193,10 +199,21 @@ function asms_get_accounts_summary($grouped_accounts) {
             $summary['suggested_pace'] += (float) $data['suggested_pace'];
             $summary['months_delivered'][$months_delivered]++;
 
-            $relative_month = asms_get_relative_report_month($data['latest_month'] ?? '');
+            $monthly_actuals = isset($data['monthly_actuals_by_month'])
+                && is_array($data['monthly_actuals_by_month'])
+                ? $data['monthly_actuals_by_month']
+                : [];
 
-            if (isset($summary['month_actuals'][$relative_month])) {
-                $summary['month_actuals'][$relative_month]++;
+            foreach ($monthly_actuals as $actual_month => $actual_value) {
+                $relative_month = asms_get_relative_report_month($actual_month);
+
+                if (isset($summary['month_actuals'][$relative_month])) {
+                    $summary['month_actuals'][$relative_month] += (float) $actual_value;
+                }
+            }
+
+            if (isset($summary['guidance'][$data['guidance']])) {
+                $summary['guidance'][$data['guidance']]++;
             }
         }
     }
@@ -269,7 +286,7 @@ function asms_render_accounts_total_card($summary) {
 }
 
 /**
- * Render the AlphaSys-only agreement-age and report-recency heatmap tables.
+ * Render the AlphaSys-only agreement-age, report-recency and pace heatmaps.
  *
  * @param array<string, mixed> $summary Aggregated card data.
  * @return string
@@ -281,10 +298,16 @@ function asms_render_accounts_heatmaps($summary) {
         $month_counts['Month ' . $month] = $summary['months_delivered'][$month] ?? 0;
     }
 
-    $month_actual_counts = [
+    $month_actual_totals = [
         'Month -3' => $summary['month_actuals'][-3] ?? 0,
         'Month -2' => $summary['month_actuals'][-2] ?? 0,
         'Month -1' => $summary['month_actuals'][-1] ?? 0,
+    ];
+
+    $guidance_counts = [
+        'Increase Pace'   => $summary['guidance']['Increase Pace'] ?? 0,
+        'Stay the Course' => $summary['guidance']['Stay the Course'] ?? 0,
+        'Decrease Pace'   => $summary['guidance']['Decrease Pace'] ?? 0,
     ];
 
     $output = '<div class="ms-portfolio-heatmaps">';
@@ -294,7 +317,12 @@ function asms_render_accounts_heatmaps($summary) {
     );
     $output .= asms_render_accounts_heatmap_table(
         'Month Actuals',
-        $month_actual_counts
+        $month_actual_totals,
+        'money'
+    );
+    $output .= asms_render_accounts_heatmap_table(
+        'Pace Guidance',
+        $guidance_counts
     );
     $output .= '</div>';
 
@@ -302,31 +330,42 @@ function asms_render_accounts_heatmaps($summary) {
 }
 
 /**
- * Render a single-row customer-count heatmap table.
+ * Render a single-row portfolio heatmap table.
  *
- * @param string             $title  Table title.
- * @param array<string, int> $counts Labelled customer counts.
+ * @param string                   $title  Table title.
+ * @param array<string, int|float> $values Labelled values.
+ * @param string                   $format Value format: number or money.
  * @return string
  */
-function asms_render_accounts_heatmap_table($title, $counts) {
-    $maximum = $counts ? max($counts) : 0;
-    $output = '<section class="ms-portfolio-heatmap ms-portfolio-heatmap-'
-        . esc_attr(sanitize_html_class(sanitize_title($title))) . '">';
+function asms_render_accounts_heatmap_table($title, $values, $format = 'number') {
+    $magnitudes = array_map('abs', $values);
+    $maximum = $magnitudes ? max($magnitudes) : 0;
+    $classes = [
+        'ms-portfolio-heatmap',
+        'ms-portfolio-heatmap-' . sanitize_html_class(sanitize_title($title)),
+    ];
+
+    if (3 === count($values)) {
+        $classes[] = 'ms-portfolio-heatmap-compact';
+    }
+
+    $output = '<section class="' . esc_attr(implode(' ', $classes)) . '">';
     $output .= '<h3>' . esc_html($title) . '</h3>';
     $output .= '<table><thead><tr>';
 
-    foreach ($counts as $label => $count) {
+    foreach ($values as $label => $value) {
         $output .= '<th scope="col">' . esc_html($label) . '</th>';
     }
 
     $output .= '</tr></thead><tbody><tr>';
 
-    foreach ($counts as $count) {
-        $alpha = $maximum > 0 ? (float) $count / $maximum : 0;
+    foreach ($values as $value) {
+        $alpha = $maximum > 0 ? abs((float) $value) / $maximum : 0;
         $background = 'rgba(0, 128, 0, ' . number_format($alpha, 3, '.', '') . ')';
+        $display_value = 'money' === $format ? asms_card_money($value) : $value;
 
         $output .= '<td class="ms-heat-cell" style="background-color: '
-            . esc_attr($background) . '">' . esc_html($count) . '</td>';
+            . esc_attr($background) . '">' . esc_html($display_value) . '</td>';
     }
 
     $output .= '</tr></tbody></table></section>';
@@ -400,13 +439,15 @@ function asms_get_account_card_data($account_id) {
     $months_delivered = 0;
     $total_variations = 0;
     $monthly_actuals = [];
+    $monthly_actuals_by_month = [];
 
-    foreach ($months as $month) {
+    foreach ($months as $month_key => $month) {
         $actual = '' !== $month['override'] && null !== $month['override']
             ? (float) str_replace(',', '', (string) $month['override'])
             : $month['actual'];
 
         $monthly_actuals[] = $actual;
+        $monthly_actuals_by_month[$month_key] = $actual;
 
         if ($actual > 0) {
             $actual_to_date += $actual;
@@ -446,6 +487,7 @@ function asms_get_account_card_data($account_id) {
         'guidance'               => $guidance,
         'monthly_plan'           => $plan,
         'monthly_actuals'        => $monthly_actuals,
+        'monthly_actuals_by_month' => $monthly_actuals_by_month,
         'related_users'          => asms_get_external_related_users($account_id),
     ];
 }
