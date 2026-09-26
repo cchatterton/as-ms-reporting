@@ -2,6 +2,10 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.15 - 2026-09-26
+
+- Declare alphasys.com.au and its subdomains as the allowed catalogue domains in plugin headers. Controller 0.5.0 reads these release headers; localhost remains available for development.
+
 ## 1.4.14 - 2026-09-23
 
 - Restored the **Increase Pace**, **Stay the Course** and **Decrease Pace** heatmap as **Pace Guidance**.
