@@ -1,7 +1,7 @@
 # AS Managed Services Reporting
 
 Author: AlphaSys  
-Version: 1.4.15<br>
+Version: 1.4.16<br>
 Status: Production
 
 AS Managed Services Reporting provides managed-services account reporting, related-user access controls, tab-separated data imports, and optional AI-assisted classification and summaries.
@@ -29,3 +29,7 @@ Run `scripts/build-plugin-zip.sh` from the repository root. The script creates b
 ## Security
 
 Never commit API keys or other credentials. If a key has previously appeared in a ZIP, repository, log, or chat output, revoke it before deploying this release.
+
+## Controller integration — 1.4.16
+
+Remove independent GitHub update checks and delegate updates to AlphaSys Update Controller. Keep Beta readiness and existing feature settings, package identity and domain restrictions. Previous standalone GitHub update instructions are superseded.

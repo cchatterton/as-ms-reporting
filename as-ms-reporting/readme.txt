@@ -2,9 +2,9 @@
 Contributors: alphasys
 Tags: reporting, managed services, accounts, analytics, ai
 Requires at least: 7.0
-Tested up to: 7.1
-Stable tag: 1.4.15
-Requires PHP: 8.1
+Tested up to: 7.0
+Stable tag: 1.4.16
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,9 @@ OpenAI API terms: https://openai.com/policies/service-terms/
 OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 
 == Changelog ==
+
+= 1.4.16 =
+* Remove independent GitHub update checks and delegate updates to AlphaSys Update Controller. Keep Beta readiness and existing feature settings, package identity and domain restrictions.
 
 = 1.4.15 =
 * Declare alphasys.com.au and its subdomains as the allowed catalogue domains in plugin headers. Controller 0.5.0 reads these release headers; localhost remains available for development.
@@ -199,3 +202,10 @@ OpenAI privacy policy: https://openai.com/policies/privacy-policy/
 = 1.0.0 =
 
 * Published the first stable release.
+
+== Managed updates ==
+
+Install or activate AlphaSys Update Controller using the plugin row action. Update discovery is manual or scheduled by the controller; ordinary page rendering never checks GitHub. Feature operation does not require the controller. This release remains Beta. Earlier standalone updater instructions are superseded. Explicit controller installation downloads the official GitHub release; no feature settings or site inventory are sent. GitHub receives normal request metadata.
+
+Service terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
+Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement

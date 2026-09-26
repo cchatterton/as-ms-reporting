@@ -1,7 +1,7 @@
 # AS Managed Services Reporting
 
 Author: AlphaSys  
-Version: 1.4.15
+Version: 1.4.16
 Status: Production
 
 ## Purpose
@@ -15,3 +15,7 @@ This plugin requires WordPress 7.0 or later. Configure providers under **Setting
 ## Updates
 
 Updates are delivered from public releases at https://github.com/cchatterton/as-ms-reporting.
+
+## Controller integration — 1.4.16
+
+Remove independent GitHub update checks and delegate updates to AlphaSys Update Controller. Keep Beta readiness and existing feature settings, package identity and domain restrictions. Previous standalone GitHub update instructions are superseded.

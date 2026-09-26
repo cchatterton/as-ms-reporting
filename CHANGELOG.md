@@ -2,6 +2,12 @@
 
 All notable changes to AS Managed Services Reporting are recorded here.
 
+## 1.4.16 - 2026-09-26
+
+- Align WordPress 7.0 / PHP 7.4 metadata, GPL/readme packaging and project-authored CSS units with current Codex standards.
+- Remove independent GitHub update checks and delegate updates to AlphaSys Update Controller. Keep Beta readiness and existing feature settings, package identity and domain restrictions.
+- Standardise update headers and controller-aware Install/Activate/Check links.
+
 ## 1.4.15 - 2026-09-26
 
 - Declare alphasys.com.au and its subdomains as the allowed catalogue domains in plugin headers. Controller 0.5.0 reads these release headers; localhost remains available for development.
